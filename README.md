@@ -13,6 +13,7 @@ The TMCMC alorgithm can be used to sample from un-normalised probability density
 
 Instead of atempting to directly sample from the posterior, TMCMC samples from easy-to-sample "transitional" distributions. Defined by:
 
+<img src="https://imgur.com/5p4APND.png" data-canonical-src="https://imgur.com/5p4APND.png" width="300" />
 
 
 ## Installation
@@ -23,6 +24,30 @@ This is not yet a registered julia package. However this package may be installe
 julia> ]
 pkg> add https://github.com/AnderGray/TransitionalMCMC.jl
 ```
+
+## Usage
+
+Sampling Himmelblau's Function:
+
+```Julia
+using PyPlot
+
+# Prior Bounds
+lb  = -5        
+ub  = 5
+
+# Prior Density and sampler
+priorDen(x) = pdf(Uniform(lb,ub), x[1,:]) .* pdf(Uniform(lb,ub), x[2,:])
+priorRnd(Nsamples) = rand(Uniform(lb,ub), Nsamples, 2)
+
+# Log Likelihood
+logLik(x) = -1 .* ((x[1,:].^2 .+ x[2,:] .- 11).^2 .+ (x[1,:] .+ x[2,:].^2 .- 7).^2)
+
+samps, acc =tmcmc(logLik, priorDen, priorRnd, 2000)
+
+plt.scatter(samps[:,1], samps[:,2])
+```
+<img src="https://imgur.com/ySv4BzI.png" data-canonical-src="https://imgur.com/ySv4BzI.png" width="1000" />
 
 ## Bibiography
 
