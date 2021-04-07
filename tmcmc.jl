@@ -57,11 +57,8 @@ function tmcmc(LogLik, prior, priorRnd, Nsamples, burnin = 50, LastBurnin = burn
         for i = 1:Nsamples
 
             this, that = MHsampleLog(target, prop, resamps[i,:], 1, 20)
-
             thetaj1[i] = this[1]
             acc[i] = that
-
-
         end
 
         meanAcc = mean(acc)
