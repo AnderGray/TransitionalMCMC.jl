@@ -22,10 +22,13 @@
 ###
 module TransitionalMCMC
 
-using Distributions
+using Reexport
+@reexport using Distributions
 using StatsBase   
 
 export 
     tmcmc, MHsample, MHsampleSimple
 
+include("tmcmc.jl")
+include("mcmc.jl")
 end # module
