@@ -1,9 +1,5 @@
 using PyPlot
 
-include("mcmc.jl")
-include("tmcmc.jl")
-
-
 lb  = -15
 ub  = 15
 
@@ -15,11 +11,6 @@ function log_fD_T(x)
 end
 
 Nsamples = 2000
-burnin= 50
-beta = 0.2
-thin = 3
-
-#samps, acc = tmcmc_par(log_fD_T, fT, sample_fT, Nsamples)
 samps, acc =tmcmc_par(log_fD_T, fT, sample_fT, Nsamples)
 
 plt.hist(samps,50)
