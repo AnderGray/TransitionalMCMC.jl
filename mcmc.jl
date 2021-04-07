@@ -43,3 +43,36 @@ function MHsample(Target :: Function, Prop, start :: Vector{<:Real}, Nsamples ::
     accRate = accRate/(Nsamples*thin+burnin)
     return chain[burnin+1:thin:end,:], accRate
 end
+
+##
+#   Symetric proposal and logged target
+##
+function MHsampleSimple(Target :: Function, PropRnd, start :: Vector{<:Real}, Nsamples :: Integer, burnin :: Integer = 50, thin ::Integer = 3)
+
+    dims = length(start)                                    # Dimensions of input/ prior
+    chain = zeros( Nsamples * thin + burnin, dims)
+    chain[1,:] = start[:]
+    accRate = 0
+
+    for i = 2:( Nsamples*thin +burnin)    
+
+        next = PropRnd(chain[i-1,:])              # Draw candidate
+        
+        targDen = Target(next)[1]                    # Target Density at next sample
+        targPrevious = Target(chain[i-1,:])[1]       # Target Density at current sample
+
+        α =  min(0, targDen - targPrevious)
+
+        accepted = α >= log(rand())
+
+        if accepted
+            chain[i,:] = next
+            accRate = accRate +1
+        else
+            chain[i,:] = chain[i-1, :]
+        end
+
+    end
+    accRate = accRate/(Nsamples*thin+burnin)
+    return chain[burnin+1:thin:end,:], accRate
+end
