@@ -15,6 +15,7 @@ Instead of atempting to directly sample from the posterior, TMCMC samples from e
 
 <img src="https://imgur.com/5p4APND.png" data-canonical-src="https://imgur.com/5p4APND.png" width="300" />
 
+where 0 <= B<sub>j</sub> <= 1, is iterated in the algorithm starting from B<sub>j</sub> = 0 (prior) to B<sub>j</sub> = 1 (posterior).
 
 ## Installation
 
