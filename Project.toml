@@ -1,0 +1,8 @@
+name = "TransitionalMCMC"
+uuid = "5bc637a6-1a46-43ed-8ea7-ee39cc1921ce"
+authors = ["Ander Gray <ander.gray@liverpool.ac.uk>", "Adolphus Lye <Adolphus.Lye@liverpool.ac.uk>"]
+version = "0.1.0"
+
+[deps]
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
