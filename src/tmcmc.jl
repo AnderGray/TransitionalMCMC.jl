@@ -1,7 +1,3 @@
-using Distributions
-using StatsBase   
-
-
 
 function tmcmc(log_fD_T, fT, sample_fT, Nsamples, beta2 = 0.01, burnin= 20, thin=3)
 
