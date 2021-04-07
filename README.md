@@ -53,6 +53,7 @@ plt.scatter(samps[:,1], samps[:,2])
 ## Todo
 * Plotting functions
 * Parallisation
+* Storing samples across iterations
 
 ## Bibiography
 
