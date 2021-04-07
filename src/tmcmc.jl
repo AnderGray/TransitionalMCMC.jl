@@ -1,5 +1,4 @@
 using Distributions
-using Optim
 using StatsBase   
 
 

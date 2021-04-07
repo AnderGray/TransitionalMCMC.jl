@@ -1,6 +1,3 @@
-using Distributions
-
-
 ###
 #   Add description of function and inputs
 ###
