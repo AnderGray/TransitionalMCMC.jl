@@ -1,26 +1,28 @@
 using Distributions
 
 
+###
+#   Add description of function and inputs
+###
 
+function MHsample(Target, Prop, start, Nsamples :: Integer, burnin :: Integer = 50, thin ::Integer = 3; islogged = true)
 
-function MHsample(Target, Prop, start, Nsamples, burnin = 50, thin = 3; logged = true)
+    dims = length(start)                                    # Dimensions of input/ prior
 
-    dims = length(start)
+    PropRnd = mu -> rand(Prop(mu))                          # Generates a sample from the proposal given mean mu
 
-    PropRnd = x -> rand(Prop(x))
-
-    chain = zeros(Nsamples+burnin, dims)
+    chain = zeros( Nsamples * thin + burnin, dims)
     chain[1,:] = start
     accRate = 0
 
-    logged ? evalDen =  x -> exp(Target(x)) : evalDen = x -> Target(x)
+    islogged ? evalDen =  x -> exp(Target(x)) : evalDen = x -> Target(x)
 
-    for i = 2:(Nsamples+burnin )    
+    for i = 2:( Nsamples*thin +burnin)    
 
         next = PropRnd(chain[i-1,:])              # Draw candidate
         
-        targDen = evalDen(next)    # Target Density
-        targPrevious = evalDen(chain[i-1,:])     # Target Density
+        targDen = evalDen(next)                  # Target Density at next sample
+        targPrevious = evalDen(chain[i-1,:])     # Target Density at current sample
 
         propDen = pdf(Prop(chain[i-1,:]), next)
         propPrevious = pdf(Prop(next), chain[i-1,:])
@@ -38,6 +40,6 @@ function MHsample(Target, Prop, start, Nsamples, burnin = 50, thin = 3; logged =
         end
 
     end
-    accRate = accRate/(Nsamples+burnin)
-    return chain[burnin+1:end,:], accRate
+    accRate = accRate/(Nsamples*thin+burnin)
+    return chain[burnin+1:thin:end,:], accRate
 end
