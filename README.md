@@ -4,6 +4,15 @@
 Implementation of Transitional Markov Chain Monte Carlo in Julia. This implementation is heavily inspired by the implemntation of TMCMC in [OpenCOSSAN](https://github.com/cossan-working-group/OpenCossan)
 
 
+## Installation
+
+This is not yet a registered julia package. However this package may be installed using the Julia package manager:
+
+```Julia
+julia> ]
+pkg> add https://github.com/AnderGray/TransitionalMCMC.jl
+```
+
 ## Bibiography
 
 * J. Ching, and Y. Chen (2007). [Transitional Markov Chain Monte Carlo method for Bayesian model updating, Model class selection, and Model averaging.](https://ascelibrary.org/doi/pdf/10.1061/(ASCE)0733-9399(2007)133%3A7(816)?casa_token=mGf_dvFGtYcAAAAA%3AvPklSPi0HXqUX9VabgqN5xILx6e8cH973IUbkgCKkRjooKku7__DhKk3yuYqzyTSIXBluhaEes2MXg&) Journal of Engineering Mechanics, 133(7), 816-832. doi:10.1061/(asce)0733-9399(2007)133:7(816)
