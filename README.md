@@ -1,7 +1,7 @@
 # TransitionalMCMC.jl
 
 
-Implementation of Transitional Markov Chain Monte Carlo (TMCMC) in Julia. This implementation is heavily inspired by the implemntation of TMCMC in [OpenCOSSAN](https://github.com/cossan-working-group/OpenCossan)
+Implementation of Transitional Markov Chain Monte Carlo (TMCMC) in Julia. This implementation is heavily inspired by the implemntation of TMCMC in [OpenCOSSAN](https://github.com/cossan-working-group/OpenCossan).
 
 The TMCMC alorgithm can be used to sample from un-normalised probability density function (i.e. posterior distributions in Bayesian Updating). The TMCMC alorgithm overcomes some of the issues with Metropolis Hastings:
 
