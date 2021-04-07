@@ -1,4 +1,22 @@
 ###
+#   Simple implmentation of the Metropolis Hasting algorithm in julia
+#
+#            Institute for Risk and Uncertainty, Uni of Liverpool
+#
+#                       Authors: Ander Gray, Adolphus Lye
+#
+#                       Email: Ander.Gray@liverpool.ac.uk, 
+#                              Adolphus.Lye@liverpool.ac.uk
+#
+#
+#
+#       W. K. Hastings (1970). Monte Carlo sampling methods using 
+#       Markov chains and their applications. Biometrika, 
+#       57(1), 97-109. doi:10.1093/biomet/57.1.97
+#
+###
+
+###
 #   Add description of function and inputs
 ###
 
@@ -53,7 +71,7 @@ function MHsampleSimple(Target :: Function, PropRnd, start :: Vector{<:Real}, Ns
 
     for i = 2:( Nsamples*thin +burnin)    
 
-        next = PropRnd(chain[i-1,:])              # Draw candidate
+        next = PropRnd(chain[i-1,:])                 # Draw candidate
         
         targDen = Target(next)[1]                    # Target Density at next sample
         targPrevious = Target(chain[i-1,:])[1]       # Target Density at current sample
