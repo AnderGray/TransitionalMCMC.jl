@@ -28,7 +28,7 @@ pkg> add https://github.com/AnderGray/TransitionalMCMC.jl
 
 ## Usage
 
-Sampling Himmelblau's Function:
+Sampling [Himmelblau's Function](https://en.wikipedia.org/wiki/Himmelblau%27s_function):
 
 ```Julia
 using PyPlot
