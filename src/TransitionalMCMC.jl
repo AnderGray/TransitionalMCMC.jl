@@ -24,16 +24,13 @@ module TransitionalMCMC
 
 using Reexport
 @reexport using Distributed
-
-@everywhere using Distributions
-@reexport using StatsBase   
+@reexport using StatsBase
 @reexport using Distributions
 
 
-export 
-    tmcmc, MHsample, MHsampleSimple, tmcmc_par
+export tmcmc, MHsample, MHsampleSimple, tmcmc_par
 
-@everywhere include("tmcmc.jl")
-@everywhere include("tmcmc_par.jl")
-@everywhere include("mcmc.jl")
+include("tmcmc.jl")
+include("tmcmc_par.jl")
+include("mcmc.jl")
 end # module
