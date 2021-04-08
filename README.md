@@ -44,15 +44,45 @@ priorRnd(Nsamples) = rand(Uniform(lb,ub), Nsamples, 2)
 # Log Likelihood
 logLik(x) = -1 .* ((x[1,:].^2 .+ x[2,:] .- 11).^2 .+ (x[1,:] .+ x[2,:].^2 .- 7).^2)
 
-samps, acc =tmcmc(logLik, priorDen, priorRnd, 2000)
+samps, Log_ev = tmcmc(logLik, priorDen, priorRnd, 2000)
 
 plt.scatter(samps[:,1], samps[:,2])
 ```
+
+
+
 <img src="https://imgur.com/ySv4BzI.png" data-canonical-src="https://imgur.com/ySv4BzI.png" width="1500" />
+
+### For parallel excution
+
+```Julia
+using Distributed
+
+addprocs(4; exeflags="--project")
+@everywhere begin
+    using TransitionalMCMC
+
+    # Prior Bounds
+    lb, ub  = -5, 5
+
+    # Prior Density and sampler
+    priorDen(x) = pdf(Uniform(lb, ub), x[1,:]) .* pdf(Uniform(lb, ub), x[2,:])
+    priorRnd(Nsamples) = rand(Uniform(lb, ub), Nsamples, 2)
+
+    # Log Likelihood
+    function logLik(x)
+        return -1 .* ((x[1,:].^2 .+ x[2,:] .- 11).^2 .+ (x[1,:] .+ x[2,:].^2 .- 7).^2)
+    end
+
+end
+
+Nsamples = 200
+
+samps, Log_ev = tmcmc(logLik, priorDen, priorRnd, Nsamples, 5, 2)
+```
 
 ## Todo
 * Plotting functions
-* Parallisation
 * Storing samples across iterations
 
 ## Bibiography
