@@ -69,7 +69,7 @@ function MHsampleSimple(Target :: Function, PropRnd, start :: Vector{<:Real}, Ns
     chain[1,:] = start[:]
     accRate = 0
 
-    for i = 2:( Nsamples*thin +burnin)    
+    for i = 2:( Nsamples*thin+burnin)    
 
         next = PropRnd(chain[i-1,:])                 # Draw candidate
         

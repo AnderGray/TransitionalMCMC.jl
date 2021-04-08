@@ -21,16 +21,17 @@
 #
 ###
 
-function tmcmc(log_fD_T, fT, sample_fT, Nsamples, burnin= 20, thin=3, beta2 = 0.01)
+
+function tmcmc_par(log_fD_T, fT, sample_fT, Nsamples, burnin= 20, thin=3, beta2 = 0.01)
 
     j1 = 0;                     # Iteration number
     βj = 0;                     # Tempering parameter
-    θ_j = sample_fT(Nsamples);  # Samples of prior
+    @everywhere θ_j = sample_fT(Nsamples);  # Samples of prior
     Lp_j = zeros(Nsamples,1);   # Log liklihood of first iteration
 
     Log_ev = 0                  # Log Evidence
 
-    Ndims = size(θ_j,2)         # Number of dimensions (input)
+    @everywhere Ndims = size(θ_j,2)         # Number of dimensions (input)
     
 
     while βj < 1
@@ -42,8 +43,11 @@ function tmcmc(log_fD_T, fT, sample_fT, Nsamples, burnin= 20, thin=3, beta2 = 0.
         ###
         # Compute likelihood values (to be parallelised)
         ###
-        print("Computing likelihood of samples....")
-        Lp_j = log_fD_T(θ_j')                         
+        print("Computing likelihood with $(nworkers()) workers....")
+        #Lp_j = log_fD_T(θ_j')
+        ins = [θ_j[i,:] for i in 1:size(θ_j,1)]
+        Lp_j = pmap(log_fD_T, ins)              
+        Lp_j = reduce(vcat,Lp_j)           
         #Lp_j = pamp(log_fD_T,θ_j')                         
         println("Done!")
 
@@ -92,24 +96,22 @@ function tmcmc(log_fD_T, fT, sample_fT, Nsamples, burnin= 20, thin=3, beta2 = 0.
         # Ensure that cov is symetric
         SIGMA_j = (SIGMA_j' + SIGMA_j)/2
 
-        prop = mu -> proprnd(mu, SIGMA_j, fT)           # Anonymous function for proposal
+        @everywhere prop = mu -> proprnd(mu, SIGMA_j, fT)           # Anonymous function for proposal
 
-        target = x -> log_fD_T(x) .* βj1 .+ log.(fT(x)) # Anonymous function for transitional distribution
+        @everywhere target = x -> log_fD_T(x) .* βj1 .+ log.(fT(x)) # Anonymous function for transitional distribution
 
         # Weighted resampling of θj (indecies with replacement)
         randIndex = sample(1:Nsamples, Weights(wn_j), Nsamples, replace=true)
 
-        θ_j1 = zeros(Nsamples, Ndims)
-        α = zeros(Nsamples)                 # acceptance rates
+        ins = [θ_j[randIndex[i], :] for i = 1:Nsamples]
 
-        print("Markov chains...")
-        for i = 1:Nsamples
-            samps, αs = MHsampleSimple(target, prop, θ_j[randIndex[i], :], 1, burnin, thin)
-            θ_j1[i,:] = samps
-            α[i] = αs
-        end
+        print("Markov chains ...")
+        #θ_j1, α = map(runChains, target, prop, ins, burnin, thin)
+        θ_j1 = pmap(x -> runChains2(target, prop, x, burnin, thin), ins)
+
+        θ_j1 = reduce(vcat, θ_j1)
+
         println("Done!")
-        meanα = mean(α)
 
         #println("Mean α = $(meanα)")
         
@@ -119,7 +121,29 @@ function tmcmc(log_fD_T, fT, sample_fT, Nsamples, burnin= 20, thin=3, beta2 = 0.
     return θ_j, Log_ev
 end
 
-function proprnd(mu, covMat, prior)
+function runChains(target, prop, θ_js, burnin, thin)
+    
+    Nsamples = size(θ_js, 1)
+    Ndims    = size(θ_js,2)
+    θ_j1 = zeros(Nsamples, Ndims)
+    α = zeros(Nsamples,1)
+    for i = 1: Nsamples
+        samps, αs = MHsampleSimple(target, prop, θ_j[i], 1, burnin, thin)
+        θ_j1[i,:] = samps
+        α[i] = αs
+    end
+
+    return θ_j1, α
+
+end
+
+@everywhere function runChains2(target, prop, θ_js, burnin, thin)
+    samps, α  = MHsampleSimple(target, prop, θ_js, 1, burnin, thin)
+    return samps
+end
+
+
+@everywhere function proprnd(mu, covMat, prior)
 
     samp = rand(MvNormal(mu, covMat), 1)
     while iszero(prior(samp))
@@ -127,3 +151,4 @@ function proprnd(mu, covMat, prior)
     end
     return samp[:]
 end
+
