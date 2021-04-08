@@ -7,7 +7,7 @@ The TMCMC alorgithm can be used to sample from un-normalised probability density
 
 * Can efficiently sample multimodal distributions
 * Works well in high dimensions (within reason)
-* Compute the evidence
+* Computes the evidence
 * Proposal distribution selected by algorithm
 * Easy to parallelise
 
@@ -28,7 +28,7 @@ pkg> add https://github.com/AnderGray/TransitionalMCMC.jl
 
 ## Usage
 
-Sampling Himmelblau's Function:
+Sampling [Himmelblau's Function](https://en.wikipedia.org/wiki/Himmelblau%27s_function):
 
 ```Julia
 using PyPlot
@@ -48,7 +48,7 @@ samps, acc =tmcmc(logLik, priorDen, priorRnd, 2000)
 
 plt.scatter(samps[:,1], samps[:,2])
 ```
-<img src="https://imgur.com/ySv4BzI.png" data-canonical-src="https://imgur.com/ySv4BzI.png" width="1000" />
+<img src="https://imgur.com/ySv4BzI.png" data-canonical-src="https://imgur.com/ySv4BzI.png" width="1500" />
 
 ## Todo
 * Plotting functions
