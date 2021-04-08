@@ -31,7 +31,8 @@ pkg> add https://github.com/AnderGray/TransitionalMCMC.jl
 Sampling [Himmelblau's Function](https://en.wikipedia.org/wiki/Himmelblau%27s_function):
 
 ```Julia
-using PyPlot
+using StatsBase, Distributions, PyPlot
+using TransitionalMCMC
 
 # Prior Bounds
 lb  = -5        
@@ -56,7 +57,7 @@ plt.scatter(samps[:,1], samps[:,2])
 ### For parallel excution
 
 ```Julia
-using Distributed
+using Distributed, StatsBase, Distributions, PyPlot
 
 addprocs(4; exeflags="--project")
 @everywhere begin
