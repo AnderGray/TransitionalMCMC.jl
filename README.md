@@ -7,7 +7,7 @@ The TMCMC alorgithm can be used to sample from un-normalised probability density
 
 * Can efficiently sample multimodal distributions
 * Works well in high dimensions (within reason)
-* Compute the evidence
+* Computes the evidence
 * Proposal distribution selected by algorithm
 * Easy to parallelise
 
