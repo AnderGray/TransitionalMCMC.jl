@@ -22,10 +22,8 @@
 ###
 module TransitionalMCMC
 
-using Reexport
-@reexport using Distributed
-@reexport using StatsBase
-@reexport using Distributions
+
+using Distributed, StatsBase, Distributions
 
 
 export tmcmc, MHsample, MHsampleSimple

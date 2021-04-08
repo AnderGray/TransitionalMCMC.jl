@@ -1,4 +1,5 @@
-using PyPlot
+using Distributed, StatsBase, Distributions, PyPlot
+using TransitionalMCMC
 
 
 prop(mu) = rand(MvNormal(mu,[3 0 0; 0 3 0; 0 0 3]))

@@ -1,4 +1,5 @@
-using PyPlot
+using Distributed, StatsBase, Distributions, PyPlot
+using TransitionalMCMC
 
 lb  = -15
 ub  = 15

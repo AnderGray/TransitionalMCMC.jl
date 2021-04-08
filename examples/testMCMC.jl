@@ -1,6 +1,5 @@
-using PyPlot
-include("mcmc.jl")
-
+using Distributed, StatsBase, Distributions, PyPlot
+using TransitionalMCMC
 
 prop(mu) = MvNormal(mu,[3 0 0; 0 3 0; 0 0 3])
 
