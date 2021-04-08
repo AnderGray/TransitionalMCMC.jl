@@ -44,7 +44,7 @@ priorRnd(Nsamples) = rand(Uniform(lb,ub), Nsamples, 2)
 # Log Likelihood
 logLik(x) = -1 .* ((x[1,:].^2 .+ x[2,:] .- 11).^2 .+ (x[1,:] .+ x[2,:].^2 .- 7).^2)
 
-samps =tmcmc(logLik, priorDen, priorRnd, 2000)
+samps, Log_ev = tmcmc(logLik, priorDen, priorRnd, 2000)
 
 plt.scatter(samps[:,1], samps[:,2])
 ```
@@ -78,7 +78,7 @@ end
 
 Nsamples = 200
 
-samps = tmcmc(logLik, priorDen, priorRnd, Nsamples, 5, 2)
+samps, Log_ev = tmcmc(logLik, priorDen, priorRnd, Nsamples, 5, 2)
 ```
 
 ## Todo
