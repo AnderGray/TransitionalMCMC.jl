@@ -48,7 +48,7 @@ samps, acc =tmcmc(logLik, priorDen, priorRnd, 2000)
 
 plt.scatter(samps[:,1], samps[:,2])
 ```
-<img src="https://imgur.com/ySv4BzI.png" data-canonical-src="https://imgur.com/ySv4BzI.png" width="1000" />
+<img src="https://imgur.com/ySv4BzI.png" data-canonical-src="https://imgur.com/ySv4BzI.png" width="1500" />
 
 ## Todo
 * Plotting functions
