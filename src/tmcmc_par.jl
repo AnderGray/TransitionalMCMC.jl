@@ -105,7 +105,7 @@ function tmcmc_par(log_fD_T, fT, sample_fT, Nsamples, burnin=20, thin=3, beta2=0
 
         ins = [θ_j[randIndex[i], :] for i = 1:Nsamples]
 
-        print("Markov chains ...")
+        print("Markov chains with $(nworkers()) ...")
         # θ_j1, α = map(runChains, target, prop, ins, burnin, thin)
         θ_j1 = pmap(x -> runChains2(target, prop, x, burnin, thin), ins)
 
