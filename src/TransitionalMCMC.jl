@@ -28,9 +28,8 @@ using Reexport
 @reexport using Distributions
 
 
-export tmcmc, MHsample, MHsampleSimple, tmcmc_par
+export tmcmc, MHsample, MHsampleSimple
 
 include("tmcmc.jl")
-include("tmcmc_par.jl")
 include("mcmc.jl")
 end # module
