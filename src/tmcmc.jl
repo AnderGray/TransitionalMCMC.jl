@@ -1,5 +1,5 @@
 ###
-#   An implmentation of Transitional Markov Chain Monte Carlo in Julia
+#   An implementation of Transitional Markov Chain Monte Carlo in Julia
 #
 #            Institute for Risk and Uncertainty, Uni of Liverpool
 #
