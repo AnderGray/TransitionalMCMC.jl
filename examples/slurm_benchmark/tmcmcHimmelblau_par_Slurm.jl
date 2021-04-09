@@ -1,9 +1,9 @@
-using Distributed, StatsBase, Distributions, PyPlot, ClusterManagers
+using Distributed, StatsBase, ClusterManagers
 
-addprocs(SlurmManager(20); exeflags="--project")
+addprocs(SlurmManager(parse(Int64, ARGS[1])))
 @everywhere begin
-    
-    using TransitionalMCMC
+
+    using TransitionalMCMC, Distributions
 
     # Prior Bounds
     lb, ub  = -5, 5
@@ -14,18 +14,14 @@ addprocs(SlurmManager(20); exeflags="--project")
 
     # Log Likelihood
     function logLik(x)
-        sleep(0.005)
+        sleep(0.05)
         return -1 .* ((x[1,:].^2 .+ x[2,:] .- 11).^2 .+ (x[1,:] .+ x[2,:].^2 .- 7).^2)
     end
 
 end
 
-Nsamples = 200
+Nsamples = 2000
 
-samps, acc = tmcmc(logLik, priorDen, priorRnd, Nsamples, 5, 2)
-
-plt.scatter(samps[:,1], samps[:,2])
-
-savefig("Output.png")
+@time samps, acc = tmcmc(logLik, priorDen, priorRnd, Nsamples, 5, 2)
 
 rmprocs(workers())
