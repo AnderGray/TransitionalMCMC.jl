@@ -21,7 +21,7 @@
 #
 ###
 
-function tmcmc(log_fD_T, fT, sample_fT, Nsamples, burnin=20, thin=3, beta2=0.01)
+function tmcmc(log_fD_T, log_fT, sample_fT, Nsamples, burnin=20, thin=3, beta2=0.01)
 
     j1 = 0;                     # Iteration number
     βj = 0;                     # Tempering parameter
@@ -95,9 +95,9 @@ function tmcmc(log_fD_T, fT, sample_fT, Nsamples, burnin=20, thin=3, beta2=0.01)
         # Ensure that cov is symetric
         SIGMA_j = (SIGMA_j' + SIGMA_j) / 2
 
-        prop = mu -> proprnd(mu, SIGMA_j, fT)           # Anonymous function for proposal
+        prop = mu -> proprnd(mu, SIGMA_j, x -> exp.(log_fT(x)))           # Anonymous function for proposal
 
-        target = x -> log_fD_T(x) .* βj1 .+ log.(fT(x)) # Anonymous function for transitional distribution
+        target = x -> log_fD_T(x) .* βj1 .+ log_fT(x) # Anonymous function for transitional distribution
 
         # Weighted resampling of θj (indecies with replacement)
         randIndex = sample(1:Nsamples, Weights(wn_j), Nsamples, replace=true)
@@ -150,6 +150,3 @@ function runChains2(target, prop, θ_js, burnin, thin)
     return θ_j1, α
 
 end
-
-
-
