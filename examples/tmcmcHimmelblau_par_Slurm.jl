@@ -24,6 +24,8 @@ Nsamples = 200
 
 samps, acc = tmcmc(logLik, priorDen, priorRnd, Nsamples, 5, 2)
 
-# plt.scatter(samps[:,1], samps[:,2])
+plt.scatter(samps[:,1], samps[:,2])
+
+savefig("Output.png")
 
 rmprocs(workers())
