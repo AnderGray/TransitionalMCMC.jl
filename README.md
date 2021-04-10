@@ -77,7 +77,7 @@ addprocs(4; exeflags="--project")
 
 end
 
-Nsamples = 200
+Nsamples = 2000
 
 samps, Log_ev = tmcmc(logLik, priorDen, priorRnd, Nsamples, 5, 2)
 ```
