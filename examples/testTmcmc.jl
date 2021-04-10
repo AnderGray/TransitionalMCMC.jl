@@ -4,7 +4,7 @@ using TransitionalMCMC
 lb  = -15
 ub  = 15
 
-prior(x) = pdf(Uniform(lb,ub), x[1,:]) .* pdf(Uniform(lb,ub), x[2,:])
+prior(x) = logpdf(Uniform(lb,ub), x[1,:]) .* logpdf(Uniform(lb,ub), x[2,:])
 priorRnd(Nsamples) = rand(Uniform(lb,ub), 2, Nsamples)
 
 function LogLik(x)
