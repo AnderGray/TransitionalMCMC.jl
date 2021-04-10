@@ -14,7 +14,7 @@ addprocs(SlurmManager(parse(Int64, ARGS[1])))
 
     # Log Likelihood
     function logLik(x)
-        sleep(0.05)
+        sleep(5)
         return -1 .* ((x[1,:].^2 .+ x[2,:] .- 11).^2 .+ (x[1,:] .+ x[2,:].^2 .- 7).^2)
     end
 
