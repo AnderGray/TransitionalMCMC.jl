@@ -1,7 +1,7 @@
 name = "TransitionalMCMC"
 uuid = "5bc637a6-1a46-43ed-8ea7-ee39cc1921ce"
 authors = ["Ander Gray <ander.gray@liverpool.ac.uk>", "Adolphus Lye <Adolphus.Lye@liverpool.ac.uk>"]
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
