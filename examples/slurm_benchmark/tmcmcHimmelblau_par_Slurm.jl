@@ -9,12 +9,12 @@ addprocs(SlurmManager(parse(Int64, ARGS[1])))
     lb, ub  = -5, 5
 
     # Prior Density and sampler
-    priorDen(x) = pdf(Uniform(lb, ub), x[1,:]) .* pdf(Uniform(lb, ub), x[2,:])
+    priorDen(x) = logpdf(Uniform(lb, ub), x[1,:]) .* logpdf(Uniform(lb, ub), x[2,:])
     priorRnd(Nsamples) = rand(Uniform(lb, ub), Nsamples, 2)
 
     # Log Likelihood
     function logLik(x)
-        sleep(0.05)
+        sleep(1)
         return -1 .* ((x[1,:].^2 .+ x[2,:] .- 11).^2 .+ (x[1,:] .+ x[2,:].^2 .- 7).^2)
     end
 
