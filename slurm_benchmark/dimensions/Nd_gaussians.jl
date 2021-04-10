@@ -1,7 +1,7 @@
 using Distributed, StatsBase, ClusterManagers
 
 
-addprocs(SlurmManager(120))
+addprocs(SlurmManager(64))
 @everywhere begin
 
     using TransitionalMCMC, Distributions, LinearAlgebra
@@ -20,10 +20,10 @@ addprocs(SlurmManager(120))
 
     # Log Likelihood
     logLik(x) = log.(pdf(MvNormal(mean1, cov), x) .+ pdf(MvNormal(mean2, cov), x))
-    
+
 end
 
-Nsamples = 2000
+Nsamples = 1000
 
 @time samps, acc = tmcmc(logLik, priorDen, priorRnd, Nsamples, 5, 2)
 
