@@ -5,7 +5,7 @@ addprocs(4)
 @everywhere begin
 
     using TransitionalMCMC, Distributions, LinearAlgebra
-    Ndims = 10
+    Ndims = 15
     # Prior Bounds
     lb, ub  = -10, 10
 
@@ -23,7 +23,7 @@ addprocs(4)
 
 end
 
-Nsamples = 2000
+Nsamples = 1000
 
 @time samps, acc = tmcmc(logLik, priorDen, priorRnd, Nsamples, 5, 2)
 

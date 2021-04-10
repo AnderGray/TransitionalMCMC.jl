@@ -2,10 +2,10 @@
 #   Script for launching many Himmelblaus
 ###
 
-numProcs = [1, 5, 10, 20, 50, 80, 100, 120, 150, 180]
+numDims = [10, 11, 12, 13, 14, 15, 20, 50, 80, 100]
 
 script = ""
-for num in numProcs
+for num in numDims
 
     script = 
 "#!/bin/bash -l
@@ -14,7 +14,7 @@ for num in numProcs
 #SBATCH -o output_$num
 #SBATCH -D ./
 #SBATCH --export=ALL
-#SBATCH -n $num
+#SBATCH -n 64
 #SBATCH -t 24:00:00
 
 module purge
@@ -33,7 +33,7 @@ echo -----------------
 echo
 hostname
 
-julia tmcmcHimmelblau_par_Slurm.jl $num
+julia Nd_gaussians.jl $num
 echo
 echo ---------------
 echo Job output ends

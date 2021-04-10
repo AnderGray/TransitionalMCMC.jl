@@ -1,10 +1,10 @@
-using Distributed, StatsBase, ClusterManagers, LinearAlgebra
+using Distributed, StatsBase, ClusterManagers
 
 
 addprocs(SlurmManager(120))
 @everywhere begin
 
-    using TransitionalMCMC, Distributions
+    using TransitionalMCMC, Distributions, LinearAlgebra
     Ndims = parse(Int64, ARGS[1])
     # Prior Bounds
     lb, ub  = -10, 10
@@ -20,7 +20,7 @@ addprocs(SlurmManager(120))
 
     # Log Likelihood
     logLik(x) = log.(pdf(MvNormal(mean1, cov), x) .+ pdf(MvNormal(mean2, cov), x))
-
+    
 end
 
 Nsamples = 2000
