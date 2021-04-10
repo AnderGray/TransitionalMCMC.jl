@@ -1,25 +1,19 @@
+###
+#   Script for launching many Himmelblaus
+###
 
+numProcs = [1, 5, 10, 20, 50, 80, 100, 120, 150, 180]
 
-numProcs = [1, 5, 10, 20, 50, 80, 100, 120, 150, 180, 200]
-
-#numProcs = [100, 120]
-NumNodes = 1
+script = ""
 for num in numProcs
 
-    num > 64 ? NumNodes = 2 : 
-    num > 128 ? NumNodes = 3 : 
-    num > 192 ? NumNodes = 4 : 
-
-        
-
-    script = "
-#!/bin/bash -l
+    script = 
+"#!/bin/bash -l
 #SBATCH -p phi
 #SBATCH -e errors_$num
 #SBATCH -o output_$num
 #SBATCH -D ./
 #SBATCH --export=ALL
-#SBATCH -N $NumNodes
 #SBATCH -n $num
 #SBATCH -t 24:00:00
 
@@ -49,7 +43,7 @@ echo SLURM job: finished date = `date`
 
     #println(script)
     open("runSim_$num.sh","w") do io
-        print(io,script)
+        print(io, script)
     end
-    run("sbatch runSim_$num.sh");
+    run(`sbatch runSim_$num.sh`);
 end
