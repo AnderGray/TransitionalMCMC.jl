@@ -86,8 +86,8 @@ samps, Log_ev = tmcmc(logLik, priorDen, priorRnd, Nsamples, 5, 2)
 Testing scalability of `tmcmcHimmelblau.jl` example with different model evaluations times
 
 <p float="left">
-  <img src="https://imgur.com/Q8mZWM1.png" data-canonical-src="https://imgur.com/Q8mZWM1.png" width="450" />
-  <img src="https://imgur.com/PALKfor.png" data-canonical-src="https://imgur.com/PALKfor.png" width="450" />
+  <img src="https://imgur.com/Q8mZWM1.png" data-canonical-src="https://imgur.com/Q8mZWM1.png" width="400" />
+  <img src="https://imgur.com/PALKfor.png" data-canonical-src="https://imgur.com/PALKfor.png" width="400" />
 </p>
 
 
