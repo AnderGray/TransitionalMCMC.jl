@@ -4,7 +4,7 @@ using TransitionalMCMC
 lb  = -15
 ub  = 15
 
-fT(x) = pdf(Uniform(lb,ub), x[1,:])
+fT(x) = logpdf(Uniform(lb,ub), x[1,:])
 sample_fT(Nsamples) = rand(Uniform(lb,ub), Nsamples, 1)
 
 function log_fD_T(x)

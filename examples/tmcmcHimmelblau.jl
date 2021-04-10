@@ -6,7 +6,7 @@ using TransitionalMCMC
 lb, ub  = -5, 5
 
 # Prior Density and sampler
-priorDen(x) = pdf(Uniform(lb, ub), x[1,:]) .* pdf(Uniform(lb, ub), x[2,:])
+priorDen(x) = logpdf(Uniform(lb, ub), x[1,:]) .* logpdf(Uniform(lb, ub), x[2,:])
 priorRnd(Nsamples) = rand(Uniform(lb, ub), Nsamples, 2)
 
 # Log Likelihood
