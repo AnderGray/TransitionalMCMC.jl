@@ -103,6 +103,8 @@ Testing slowdown and iteration number for various dimensions. Target is a mixtur
 ## Todo
 * Plotting functions
 * Storing samples across iterations
+* Testing
+* FE example
 
 ## Bibiography
 
