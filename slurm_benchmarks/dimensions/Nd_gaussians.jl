@@ -1,13 +1,14 @@
 using Distributed, StatsBase, ClusterManagers
 
 
-#addprocs(SlurmManager(64))
+
 addprocs(SlurmManager(10))
+
 @everywhere begin
 
     using TransitionalMCMC, Distributions, LinearAlgebra
-    #Ndims = parse(Int64, ARGS[1])
-    Ndims = 30
+    Ndims = parse(Int64, ARGS[1])
+    
     # Prior Bounds
     lb, ub  = -9.5, 9.5
 

@@ -2,8 +2,6 @@
 #   Script for launching many Himmelblaus
 ###
 
-#numDims = [10, 11, 12, 13, 14, 15, 20, 50, 80, 100]
-
 numDims = 1:30
 
 script = ""
