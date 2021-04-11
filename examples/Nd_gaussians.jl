@@ -15,7 +15,7 @@ addprocs(4)
     cov = 1* Matrix(I, Ndims, Ndims)
 
     # Prior Density and sampler
-    priorDen(x) = sum(logpdf(Uniform.(lb, ub), x))
+    priorDen(x) = sum(logpdf(Uniform.(lb, ub), x), dims = 2)
     priorRnd(Nsamples) = rand(Uniform(lb, ub), Nsamples, Ndims)
 
     # Log Likelihood

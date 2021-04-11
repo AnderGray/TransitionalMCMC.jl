@@ -1,11 +1,13 @@
 using Distributed, StatsBase, ClusterManagers
 
 
-addprocs(SlurmManager(64))
+#addprocs(SlurmManager(64))
+addprocs(SlurmManager(10))
 @everywhere begin
 
     using TransitionalMCMC, Distributions, LinearAlgebra
     Ndims = parse(Int64, ARGS[1])
+    #Ndims = 25
     # Prior Bounds
     lb, ub  = -10, 10
 
@@ -15,7 +17,7 @@ addprocs(SlurmManager(64))
     cov = 1* Matrix(I, Ndims, Ndims)
 
     # Prior Density and sampler
-    priorDen(x) = sum(logpdf(Uniform.(lb, ub), x))
+    priorDen(x) = sum(logpdf(Uniform.(lb, ub), x),dims= 2)
     priorRnd(Nsamples) = rand(Uniform(lb, ub), Nsamples, Ndims)
 
     # Log Likelihood
