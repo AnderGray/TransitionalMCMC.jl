@@ -4,7 +4,7 @@ using TransitionalMCMC
 lb  = -15
 ub  = 15
 
-prior(x) = logpdf(Uniform(lb,ub), x[1,:]) .* logpdf(Uniform(lb,ub), x[2,:])
+logprior(x) = logpdf(Uniform(lb,ub), x[1,:]) .+ logpdf(Uniform(lb,ub), x[2,:])
 priorRnd(Nsamples) = rand(Uniform(lb,ub), 2, Nsamples)
 
 function LogLik(x)
@@ -14,6 +14,6 @@ end
 Nsamples = 2000
 
 
-samps, acc = tmcmc(LogLik, prior, priorRnd, Nsamples)
+samps, acc = tmcmc(LogLik, logprior, priorRnd, Nsamples)
 
 plt.scatter(samps[1,:], samps[2,:])

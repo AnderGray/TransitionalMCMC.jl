@@ -15,7 +15,7 @@ addprocs(4)
     cov = 1* Matrix(I, Ndims, Ndims)
 
     # Prior Density and sampler
-    priorDen(x) = sum(logpdf(Uniform.(lb, ub), x), dims = 2)
+    logprior(x) = sum(logpdf(Uniform.(lb, ub), x), dims = 2)
     priorRnd(Nsamples) = rand(Uniform(lb, ub), Nsamples, Ndims)
 
     # Log Likelihood
@@ -25,6 +25,6 @@ end
 
 Nsamples = 1000
 
-@time samps, acc = tmcmc(logLik, priorDen, priorRnd, Nsamples, 5, 2)
+@time samps, acc = tmcmc(logLik, logprior, priorRnd, Nsamples, 5, 2)
 
 #rmprocs(workers())

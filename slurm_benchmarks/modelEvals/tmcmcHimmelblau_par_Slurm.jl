@@ -9,7 +9,7 @@ addprocs(SlurmManager(parse(Int64, ARGS[1])))
     lb, ub  = -5, 5
 
     # Prior Density and sampler
-    priorDen(x) = logpdf(Uniform(lb, ub), x[1,:]) .* logpdf(Uniform(lb, ub), x[2,:])
+    logprior(x) = logpdf(Uniform(lb, ub), x[1,:]) .+ logpdf(Uniform(lb, ub), x[2,:])
     priorRnd(Nsamples) = rand(Uniform(lb, ub), Nsamples, 2)
 
     # Log Likelihood
@@ -22,6 +22,6 @@ end
 
 Nsamples = 2000
 
-@time samps, acc = tmcmc(logLik, priorDen, priorRnd, Nsamples, 5, 2)
+@time samps, acc = tmcmc(logLik, logprior, priorRnd, Nsamples, 5, 2)
 
 rmprocs(workers())
