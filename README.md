@@ -83,7 +83,7 @@ samps, Log_ev = tmcmc(logLik, priorDen, priorRnd, Nsamples, 5, 2)
 ```
 ### Benchmarks
 
-Found in [/slurm_benchmarks](https://github.com/AnderGray/TransitionalMCMC.jl/tree/main/slurm_benchmark)
+Found in [/slurm_benchmarks](https://github.com/AnderGray/TransitionalMCMC.jl/tree/main/slurm_benchmarks)
 
 Testing scalability of `tmcmcHimmelblau.jl` with different model evaluations times
 
