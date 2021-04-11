@@ -81,16 +81,23 @@ Nsamples = 2000
 
 samps, Log_ev = tmcmc(logLik, priorDen, priorRnd, Nsamples, 5, 2)
 ```
-### Benchmark
+### Benchmarks
 
-Testing scalability of `tmcmcHimmelblau.jl` example with different model evaluations times
+Found in [/slurm_benchmarks](https://github.com/AnderGray/TransitionalMCMC.jl/tree/main/slurm_benchmark)
+
+Testing scalability of `tmcmcHimmelblau.jl` with different model evaluations times
 
 <p float="left">
   <img src="https://imgur.com/Q8mZWM1.png" data-canonical-src="https://imgur.com/Q8mZWM1.png" width="400" />
   <img src="https://imgur.com/PALKfor.png" data-canonical-src="https://imgur.com/PALKfor.png" width="400" />
 </p>
 
+Testing slowdown and iteration number for various dimensions. Target is a mixture of 2 Gaussians in N dimensions, with means located at [-5, -5 , ...] and [5, 5, ...]
 
+<p float="left">
+  <img src="https://imgur.com/O5nwSSR.png" data-canonical-src="https://imgur.com/Q8mZWM1.png" width="400" />
+  <img src="https://imgur.com/fcOxklJ.png" data-canonical-src="https://imgur.com/PALKfor.png" width="400" />
+</p>
 
 
 ## Todo
