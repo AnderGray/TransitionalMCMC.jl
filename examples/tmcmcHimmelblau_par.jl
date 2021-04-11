@@ -9,7 +9,7 @@ addprocs(4; exeflags="--project")
     lb, ub  = -5, 5
 
     # Prior Density and sampler
-    priorDen(x) = logpdf(Uniform(lb, ub), x[1,:]) .* logpdf(Uniform(lb, ub), x[2,:])
+    logprior(x) = logpdf(Uniform(lb, ub), x[1,:]) .+ logpdf(Uniform(lb, ub), x[2,:])
     priorRnd(Nsamples) = rand(Uniform(lb, ub), Nsamples, 2)
 
     # Log Likelihood
@@ -22,7 +22,7 @@ end
 
 Nsamples = 200
 
-samps, acc = tmcmc(logLik, priorDen, priorRnd, Nsamples, 5, 2)
+samps, acc = tmcmc(logLik, logprior, priorRnd, Nsamples, 5, 2)
 
 # plt.scatter(samps[:,1], samps[:,2])
 
