@@ -2,7 +2,9 @@
 #   Script for launching many Himmelblaus
 ###
 
-numDims = [10, 11, 12, 13, 14, 15, 20, 50, 80, 100]
+#numDims = [10, 11, 12, 13, 14, 15, 20, 50, 80, 100]
+
+numDims = 1:30
 
 script = ""
 for num in numDims
@@ -14,13 +16,10 @@ for num in numDims
 #SBATCH -o output_$num
 #SBATCH -D ./
 #SBATCH --export=ALL
-#SBATCH -n 64
+#SBATCH -n 10
 #SBATCH -t 24:00:00
 
 module purge
-#module load neutronics
-#module load libs/qt/5.9.1/gcc-5.5.0
-module load python/3.6
 module load julia
 
 #
