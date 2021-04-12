@@ -124,7 +124,7 @@ end
 function proprnd(mu, covMat, prior)
 
     samp = rand(MvNormal(mu, covMat), 1)
-    while isinf(prior(samp)[1])
+    while isinf(prior(samp')[1])
         samp = rand(MvNormal(mu, covMat),1)
     end
     return samp[:]
