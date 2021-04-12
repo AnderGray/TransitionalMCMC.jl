@@ -95,7 +95,7 @@ function tmcmc(log_fD_T, log_fT, sample_fT, Nsamples, burnin=20, thin=3, beta2=0
         # Ensure that cov is symetric
         SIGMA_j = (SIGMA_j' + SIGMA_j) / 2
 
-        prop = mu -> proprnd(mu, SIGMA_j, x -> exp.(log_fT(x)))           # Anonymous function for proposal
+        prop = mu -> proprnd(mu, SIGMA_j, log_fT)           # Anonymous function for proposal
 
         target = x -> log_fD_T(x) .* βj1 .+ log_fT(x) # Anonymous function for transitional distribution
 
@@ -124,7 +124,7 @@ end
 function proprnd(mu, covMat, prior)
 
     samp = rand(MvNormal(mu, covMat), 1)
-    while iszero(prior(samp))
+    while isinf(prior(samp)[1])
         samp = rand(MvNormal(mu, covMat),1)
     end
     return samp[:]
