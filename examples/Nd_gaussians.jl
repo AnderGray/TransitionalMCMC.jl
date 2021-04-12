@@ -1,11 +1,10 @@
 using Distributed, StatsBase
 
-
-addprocs(4)
+addprocs(4, exeflags="--project")
 @everywhere begin
 
     using TransitionalMCMC, Distributions, LinearAlgebra
-    Ndims = 15
+    Ndims = 5
     # Prior Bounds
     lb, ub  = -10, 10
 
@@ -27,4 +26,4 @@ Nsamples = 1000
 
 @time samps, acc = tmcmc(logLik, logprior, priorRnd, Nsamples, 5, 2)
 
-#rmprocs(workers())
+rmprocs(workers())

@@ -1,9 +1,9 @@
-using Distributed, StatsBase, Distributions, PyPlot
+using Distributed, StatsBase, PyPlot
 
 addprocs(4; exeflags="--project")
 @everywhere begin
     
-    using TransitionalMCMC
+    using TransitionalMCMC, Distributions
 
     # Prior Bounds
     lb, ub  = -5, 5
@@ -24,6 +24,6 @@ Nsamples = 200
 
 samps, acc = tmcmc(logLik, logprior, priorRnd, Nsamples, 5, 2)
 
-# plt.scatter(samps[:,1], samps[:,2])
+plt.scatter(samps[:,1], samps[:,2])
 
 rmprocs(workers())

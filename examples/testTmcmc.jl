@@ -4,16 +4,11 @@ using TransitionalMCMC
 lb  = -15
 ub  = 15
 
-logprior(x) = logpdf(Uniform(lb,ub), x[1,:]) .+ logpdf(Uniform(lb,ub), x[2,:])
-priorRnd(Nsamples) = rand(Uniform(lb,ub), 2, Nsamples)
+fT(x) = logpdf(Uniform(lb,ub), x[1,:]) .+ logpdf(Uniform(lb,ub), x[2,:])
+sample_fT(Nsamples) = rand(Uniform(lb,ub), Nsamples, 2)
 
-function LogLik(x)
-    return log.(pdf(MvNormal([0,0],[1 -0.5; -0.5 1]), x))
-end
+log_fD_T(x) = log.(pdf(MvNormal([0,0],[1 -0.5; -0.5 1]), x) + pdf(MvNormal([5,5],[1 0.5; 0.5 1]), x) + pdf(MvNormal([-5,5],[1 0.9; 0.9 1]), x))
 
-Nsamples = 2000
+samps, acc =tmcmc(log_fD_T, fT, sample_fT, 2000)
 
-
-samps, acc = tmcmc(LogLik, logprior, priorRnd, Nsamples)
-
-plt.scatter(samps[1,:], samps[2,:])
+plt.scatter(samps[:,1], samps[:,2])
