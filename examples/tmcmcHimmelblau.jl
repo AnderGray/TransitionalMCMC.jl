@@ -1,6 +1,4 @@
-using PyPlot, Distributions, Pkg
-
-Pkg.activate("..")
+using PyPlot, Distributions
 
 using TransitionalMCMC
 
