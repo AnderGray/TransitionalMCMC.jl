@@ -39,11 +39,11 @@ lb  = -5
 ub  = 5
 
 # Prior log Density and sampler
-logprior(x) = logpdf(Uniform(lb,ub), x[1,:]) .+ logpdf(Uniform(lb,ub), x[2,:])
+logprior(x) = logpdf(Uniform(lb,ub), x[1]) + logpdf(Uniform(lb,ub), x[2])
 priorRnd(Nsamples) = rand(Uniform(lb,ub), Nsamples, 2)
 
 # Log Likelihood
-logLik(x) = -1 .* ((x[1,:].^2 .+ x[2,:] .- 11).^2 .+ (x[1,:] .+ x[2,:].^2 .- 7).^2)
+logLik(x) = -1 * ((x[1]^2 + x[2] - 11)^2 + (x[1] + x[2]^2 - 7)^2)
 
 samps, Log_ev = tmcmc(logLik, logprior, priorRnd, 2000)
 
@@ -67,12 +67,12 @@ addprocs(4; exeflags="--project")
     lb, ub  = -5, 5
 
     # Prior log Density and sampler
-    logprior(x) = logpdf(Uniform(lb, ub), x[1,:]) .+ logpdf(Uniform(lb, ub), x[2,:])
+    logprior(x) = logpdf(Uniform(lb, ub), x[1]) + logpdf(Uniform(lb, ub), x[2])
     priorRnd(Nsamples) = rand(Uniform(lb, ub), Nsamples, 2)
 
     # Log Likelihood
     function logLik(x)
-        return -1 .* ((x[1,:].^2 .+ x[2,:] .- 11).^2 .+ (x[1,:] .+ x[2,:].^2 .- 7).^2)
+        return -1 * ((x[1]^2 + x[2] - 11)^2 + (x[1] + x[2]^2 - 7)^2)
     end
 
 end
