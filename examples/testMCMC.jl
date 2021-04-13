@@ -18,6 +18,10 @@ Ndims = size(samps,2)
 
 for i =1:Ndims
     for j = 1:Ndims
-    ax[i,j].scatter(samps[:, i],samps[:,j])
+        if i == j
+            ax[i,j].hist(samps[:,i])
+        else
+            ax[i,j].scatter(samps[:, i],samps[:,j])
+        end
     end
 end

@@ -14,11 +14,11 @@ addprocs(4, exeflags="--project")
     cov = 1* Matrix(I, Ndims, Ndims)
 
     # Prior Density and sampler
-    logprior(x) = sum(logpdf(Uniform.(lb, ub), x), dims = 2)
+    logprior(x) = sum(logpdf(Uniform.(lb, ub), x))
     priorRnd(Nsamples) = rand(Uniform(lb, ub), Nsamples, Ndims)
 
     # Log Likelihood
-    logLik(x) = log.(pdf(MvNormal(mean1, cov), x) .+ pdf(MvNormal(mean2, cov), x))
+    logLik(x) = log.(pdf(MvNormal(mean1, cov), x) + pdf(MvNormal(mean2, cov), x))
 
 end
 
