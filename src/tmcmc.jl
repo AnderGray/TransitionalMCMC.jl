@@ -121,7 +121,7 @@ function proprnd(mu, covMat, prior)
     while isinf(prior(samp))
         samp = rand(MvNormal(mu, covMat), 1)
     end
-    return samp
+    return samp[:]
 end
 
 function runChains(target, prop, θ_js, burnin, thin)
