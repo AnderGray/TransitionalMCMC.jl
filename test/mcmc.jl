@@ -1,6 +1,7 @@
 @testset "Metropolis Hastings general" begin
 
     @testset "1D" begin
+        Random.seed!(123456)
         prop(mu) = MvNormal(mu, 3)
 
         target(x) = log(pdf(MvNormal([2], 1), x))
@@ -13,6 +14,7 @@
     end
 
     @testset "3D" begin
+        Random.seed!(123456)
         prop(mu) = MvNormal(mu, [3 0 0; 0 3 0; 0 0 3])
 
         target(x) = log(pdf(MvNormal([-2, 2, 0], [1 0.5 0.5; 0.5 1 0.5; 0.5 0.5 1]), x))
@@ -28,6 +30,7 @@
     end
 
     @testset "No logged target" begin
+        Random.seed!(123456)
         prop(mu) = MvNormal(mu, [3 0 0; 0 3 0; 0 0 3])
 
         target(x) = pdf(MvNormal([-2, 2, 0], [1 0.5 0.5; 0.5 1 0.5; 0.5 0.5 1]), x)
@@ -41,14 +44,13 @@
         @test vec(σ) ≈ [1; 1; 1] atol = 0.1
         @test corrs ≈ [1 0.5 0.5; 0.5 1 0.5; 0.5 0.5 1] atol = 0.2
     end
-
 end
 
 
 @testset "Metropolis Hastings simple" begin
 
     @testset "1D" begin
-
+        Random.seed!(123456)
         proprnd(mu) = rand(MvNormal(mu, 3))
 
         target(x) = log(pdf(MvNormal([2], 1), x))
@@ -61,7 +63,7 @@ end
     end
 
     @testset "3D" begin
-
+        Random.seed!(123456)
         proprnd(mu) = rand(MvNormal(mu, [3 0 0; 0 3 0; 0 0 3]))
 
         target(x) = log(pdf(MvNormal([-2, 2, 0], [1 0.5 0.5; 0.5 1 0.5; 0.5 0.5 1]), x))
@@ -76,5 +78,5 @@ end
         @test corrs ≈ [1 0.5 0.5; 0.5 1 0.5; 0.5 0.5 1] atol = 0.2
 
     end
-
+    Random.seed!()
 end
