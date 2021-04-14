@@ -21,7 +21,14 @@
 #
 ###
 
-function tmcmc(log_fD_T :: Function, log_fT :: Function, sample_fT :: Function, Nsamples :: Integer, burnin :: Integer=20, thin :: Integer=3, beta2 :: Float64=0.01)
+function tmcmc(
+    log_fD_T::Function,
+    log_fT::Function,
+    sample_fT::Function,
+    Nsamples::Integer,
+    burnin::Integer=20,
+    thin::Integer=3,
+    beta2::Float64=0.01)
 
     j1 = 0;                     # Iteration number
     βj = 0;                     # Tempering parameter
@@ -116,7 +123,7 @@ function tmcmc(log_fD_T :: Function, log_fT :: Function, sample_fT :: Function, 
 end
 
 
-function proprnd(mu, covMat, prior)
+function proprnd(mu::AbstractVector, covMat::AbstractMatrix, prior::Function)
     samp = rand(MvNormal(mu, covMat), 1)
     while isinf(prior(samp))
         samp = rand(MvNormal(mu, covMat), 1)
@@ -124,7 +131,7 @@ function proprnd(mu, covMat, prior)
     return samp[:]
 end
 
-function run_chains(target, prop, θ_js, burnin, thin)
-    samps, α  = metropolis_hastings_simple(target, prop, θ_js, 1, burnin, thin)
+function run_chains(target::Function, prop::Function, θ_js::Vector{<:Real}, burnin::Integer, thin::Integer)
+    samps, _  = metropolis_hastings_simple(target, prop, θ_js, 1, burnin, thin)
     return samps
 end
