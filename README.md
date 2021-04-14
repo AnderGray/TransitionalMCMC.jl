@@ -1,4 +1,6 @@
 # TransitionalMCMC.jl
+![Build Status](https://github.com/AnderGray/TransitionalMCMC.jl/workflows/CI/badge.svg)
+[![Coverage Status](https://codecov.io/gh/AnderGray/TransitionalMCMC.jl/branch/main/graph/badge.svg?token=LfslMAoWvA)](https://codecov.io/gh/AnderGray/TransitionalMCMC.jl)
 
 
 Implementation of Transitional Markov Chain Monte Carlo (TMCMC) in Julia. This implementation is heavily inspired by the implemntation of TMCMC in [OpenCOSSAN](https://github.com/cossan-working-group/OpenCossan).
