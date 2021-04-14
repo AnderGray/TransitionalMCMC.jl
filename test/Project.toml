@@ -1,10 +1,7 @@
-name = "TransitionalMCMC"
-uuid = "5bc637a6-1a46-43ed-8ea7-ee39cc1921ce"
-authors = ["Ander Gray <ander.gray@liverpool.ac.uk>", "Adolphus Lye <Adolphus.Lye@liverpool.ac.uk>"]
-version = "0.3.0"
-
 [deps]
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
