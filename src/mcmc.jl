@@ -20,7 +20,7 @@
 #   Add description of function and inputs
 ###
 
-function MHsample(Target :: Function, Prop, start :: Vector{<:Real}, Nsamples :: Integer, burnin :: Integer = 50, thin ::Integer = 3; islogged :: Bool = true)
+function metropolis_hastings(Target :: Function, Prop, start :: Vector{<:Real}, Nsamples :: Integer, burnin :: Integer = 50, thin ::Integer = 3; islogged :: Bool = true)
 
     dims = length(start)                                    # Dimensions of input/ prior
 
@@ -62,7 +62,7 @@ end
 ##
 #   Symetric proposal and logged target
 ##
-function MHsampleSimple(Target :: Function, PropRnd, start :: Vector{<:Real}, Nsamples :: Integer, burnin :: Integer = 50, thin ::Integer = 3)
+function metropolis_hastings_simple(Target :: Function, PropRnd :: Function, start :: Vector{<:Real}, Nsamples :: Integer, burnin :: Integer = 50, thin ::Integer = 3)
 
     dims = length(start)                                    # Dimensions of input/ prior
     chain = zeros( Nsamples * thin + burnin, dims)
