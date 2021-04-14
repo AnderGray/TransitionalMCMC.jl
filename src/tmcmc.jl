@@ -5,18 +5,18 @@
 #
 #                       Authors: Ander Gray, Adolphus Lye
 #
-#                       Email: Ander.Gray@liverpool.ac.uk, 
+#                       Email: Ander.Gray@liverpool.ac.uk,
 #                              Adolphus.Lye@liverpool.ac.uk
 #
 #
-#   This Transitional MCMC algorithm is inspirted by OpenCOSSAN: 
+#   This Transitional MCMC algorithm is inspirted by OpenCOSSAN:
 #                   https://github.com/cossan-working-group/OpenCossan
 #
 #
-#   Algorithm originally proposed by: 
-#           J. Ching, and Y. Chen (2007). Transitional Markov Chain Monte Carlo method 
-#           for Bayesian model updating, Model class selection, and Model averaging. 
-#           Journal of Engineering Mechanics, 133(7), 816-832. 
+#   Algorithm originally proposed by:
+#           J. Ching, and Y. Chen (2007). Transitional Markov Chain Monte Carlo method
+#           for Bayesian model updating, Model class selection, and Model averaging.
+#           Journal of Engineering Mechanics, 133(7), 816-832.
 #           doi:10.1061/(asce)0733-9399(2007)133:7(816)
 #
 ###
@@ -32,30 +32,27 @@ function tmcmc(log_fD_T, log_fT, sample_fT, Nsamples, burnin=20, thin=3, beta2=0
 
     Ndims = size(θ_j, 2)         # Number of dimensions (input)
 
-
     while βj < 1
 
         j1 = j1 + 1
-        println()
-        println("Beginning iteration $j1")
+
+        @debug "Beginnig iteration $j1"
 
         ###
         # Parallel evaluation of the likelihood
         ###
-        print("Computing likelihood with $(nworkers()) workers....")
 
-        # Lp_j = log_fD_T(θ_j')             
-        
-        Lp_j = pmap(log_fD_T, eachrow(θ_j))
+        @debug "Computing likelihood with $(nworkers()) workers..."
+
+        ins = [θ_j[i,:] for i in 1:size(θ_j, 1)]
+        Lp_j = pmap(log_fD_T, ins)
         Lp_j = reduce(vcat, Lp_j)
-        
-        println("Done!")
 
         ###
         #   Computing new βj
         #   Uses bisection method
         ###
-        println("Computing Bj")
+        @debug "Computing β_j..."
 
         low_β = βj; hi_β = 2; Lp_adjust = maximum(Lp_j);
         x1 = (hi_β + low_β) / 2;
@@ -68,12 +65,13 @@ function tmcmc(log_fD_T, log_fT, sample_fT, Nsamples, burnin=20, thin=3, beta2=0
         end
 
         βj1 = min(1, x1)
-        println("B_$(j1) = $(βj1)")
+
+        @info "β_$(j1) = $(βj1)"
 
         ###
         #   Computation of normalised weights
         ###
-        println("Computing weights")
+        @debug "Computing weights..."
 
         w_j = exp.((βj1 - βj) .* (Lp_j .- Lp_adjust))       # Nominal weights from likilhood and βjs
 
@@ -96,7 +94,7 @@ function tmcmc(log_fD_T, log_fT, sample_fT, Nsamples, burnin=20, thin=3, beta2=0
         # Ensure that cov is symetric
         SIGMA_j = (SIGMA_j' + SIGMA_j) / 2
 
-        prop = mu -> proprnd(mu, SIGMA_j, log_fT)           # Anonymous function for proposal
+        prop = mu -> proprnd(mu, SIGMA_j, log_fT) # Anonymous function for proposal
 
         target = x -> log_fD_T(x) .* βj1 .+ log_fT(x) # Anonymous function for transitional distribution
 
@@ -105,15 +103,11 @@ function tmcmc(log_fD_T, log_fT, sample_fT, Nsamples, burnin=20, thin=3, beta2=0
 
         ins = [θ_j[randIndex[i], :] for i = 1:Nsamples]
 
-        print("Markov chains with $(nworkers()) workers...")
+        @debug "Markov chains with $(nworkers()) workers..."
         # pmap is a parallel map
         θ_j1 = pmap(x -> runChains(target, prop, x, burnin, thin), ins)
 
         θ_j1 = reduce(vcat, θ_j1)
-
-        println("Done!")
-
-        # println("Mean α = $(meanα)")
 
         βj = βj1
         θ_j = θ_j1
@@ -123,10 +117,9 @@ end
 
 
 function proprnd(mu, covMat, prior)
-
     samp = rand(MvNormal(mu, covMat), 1)
     while isinf(prior(samp))
-        samp = rand(MvNormal(mu, covMat),1)
+        samp = rand(MvNormal(mu, covMat), 1)
     end
     return samp[:]
 end
@@ -149,5 +142,4 @@ function runChains2(target, prop, θ_js, burnin, thin)
     end
 
     return θ_j1, α
-
 end
