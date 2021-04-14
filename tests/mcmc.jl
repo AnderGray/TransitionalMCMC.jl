@@ -48,11 +48,12 @@ end
 @testset "Metropolis Hastings simple" begin
 
     @testset "1D" begin
-        prop(mu) = MvNormal(mu, 3)
+
+        proprnd(mu) = rand(MvNormal(mu, 3))
 
         target(x) = log(pdf(MvNormal([2], 1), x))
 
-        samps, acc = metropolis_hastings(target, prop, [2], 2000, 200, islogged = true)
+        samps, acc = metropolis_hastings_simple(target, proprnd, [2], 2000, 200)
 
         @test mean(samps) ≈ 2 atol = 0.1
         @test std(samps) ≈ 1 atol = 0.1
@@ -61,11 +62,11 @@ end
 
     @testset "3D" begin
 
-        prop(mu) = rand(MvNormal(mu, [3 0 0; 0 3 0; 0 0 3]))
+        proprnd(mu) = rand(MvNormal(mu, [3 0 0; 0 3 0; 0 0 3]))
 
         target(x) = log(pdf(MvNormal([-2, 2, 0], [1 0.5 0.5; 0.5 1 0.5; 0.5 0.5 1]), x))
 
-        samps, acc = metropolis_hastings_simple(target, prop, [-2,2, 0], 2000, 200)
+        samps, acc = metropolis_hastings_simple(target, proprnd, [-2,2, 0], 2000, 200)
 
         μ = mean(samps, dims = 1)
         σ = std(samps, dims = 1)
