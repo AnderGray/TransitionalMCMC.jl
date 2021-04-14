@@ -43,11 +43,12 @@ function tmcmc(log_fD_T, log_fT, sample_fT, Nsamples, burnin=20, thin=3, beta2=0
         # Parallel evaluation of the likelihood
         ###
         print("Computing likelihood with $(nworkers()) workers....")
-        # Lp_j = log_fD_T(θ_j')
-        ins = [θ_j[i,:] for i in 1:size(θ_j, 1)]
-        Lp_j = pmap(log_fD_T, ins)
+
+        # Lp_j = log_fD_T(θ_j')             
+        
+        Lp_j = pmap(log_fD_T, eachrow(θ_j))
         Lp_j = reduce(vcat, Lp_j)
-        # Lp_j = pamp(log_fD_T,θ_j')
+        
         println("Done!")
 
         ###
@@ -127,7 +128,7 @@ function proprnd(mu, covMat, prior)
     while isinf(prior(samp))
         samp = rand(MvNormal(mu, covMat),1)
     end
-    return samp
+    return samp[:]
 end
 
 function runChains(target, prop, θ_js, burnin, thin)
