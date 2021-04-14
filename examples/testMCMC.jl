@@ -8,7 +8,7 @@ function target(x)
 end
 
 
-samps, acc = MHsample(target, prop, [-2,2, 0], 2000, 200, islogged = true)
+samps, acc = metropolis_hastings(target, prop, [-2,2, 0], 2000, 200, islogged = true)
 
 plt.scatter(samps[:, 1],samps[:,2])
 

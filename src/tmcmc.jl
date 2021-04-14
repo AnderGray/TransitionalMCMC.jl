@@ -21,7 +21,14 @@
 #
 ###
 
-function tmcmc(log_fD_T, log_fT, sample_fT, Nsamples, burnin=20, thin=3, beta2=0.01)
+function tmcmc(
+    log_fD_T::Function,
+    log_fT::Function,
+    sample_fT::Function,
+    Nsamples::Integer,
+    burnin::Integer=20,
+    thin::Integer=3,
+    beta2::Float64=0.01)
 
     j1 = 0;                     # Iteration number
     βj = 0;                     # Tempering parameter
@@ -85,16 +92,16 @@ function tmcmc(log_fD_T, log_fT, sample_fT, Nsamples, burnin=20, thin=3, beta2=0
         ###
         #   Calculation of COV matrix of proposal
         ###
-        SIGMA_j = zeros(Ndims, Ndims)
+        Σ_j    = zeros(Ndims, Ndims)
 
         for l = 1:Nsamples
-            SIGMA_j = SIGMA_j + beta2 .* wn_j[l] .* (θ_j[l,:]' .- Th_wm)' * (θ_j[l,:]' .- Th_wm)
+            Σ_j = Σ_j + beta2 .* wn_j[l] .* (θ_j[l,:]' .- Th_wm)' * (θ_j[l,:]' .- Th_wm)
         end
 
         # Ensure that cov is symetric
-        SIGMA_j = (SIGMA_j' + SIGMA_j) / 2
+        Σ_j = (Σ_j' + Σ_j) / 2
 
-        prop = mu -> proprnd(mu, SIGMA_j, log_fT) # Anonymous function for proposal
+        prop = mu -> proprnd(mu, Σ_j, log_fT) # Anonymous function for proposal
 
         target = x -> log_fD_T(x) .* βj1 .+ log_fT(x) # Anonymous function for transitional distribution
 
@@ -105,7 +112,7 @@ function tmcmc(log_fD_T, log_fT, sample_fT, Nsamples, burnin=20, thin=3, beta2=0
 
         @debug "Markov chains with $(nworkers()) workers..."
         # pmap is a parallel map
-        θ_j1 = pmap(x -> runChains(target, prop, x, burnin, thin), ins)
+        θ_j1 = pmap(x -> run_chains(target, prop, x, burnin, thin), ins)
 
         θ_j1 = reduce(vcat, θ_j1)
 
@@ -116,7 +123,7 @@ function tmcmc(log_fD_T, log_fT, sample_fT, Nsamples, burnin=20, thin=3, beta2=0
 end
 
 
-function proprnd(mu, covMat, prior)
+function proprnd(mu::AbstractVector, covMat::AbstractMatrix, prior::Function)
     samp = rand(MvNormal(mu, covMat), 1)
     while isinf(prior(samp))
         samp = rand(MvNormal(mu, covMat), 1)
@@ -124,22 +131,7 @@ function proprnd(mu, covMat, prior)
     return samp[:]
 end
 
-function runChains(target, prop, θ_js, burnin, thin)
-    samps, α  = MHsampleSimple(target, prop, θ_js, 1, burnin, thin)
+function run_chains(target::Function, prop::Function, θ_js::Vector{<:Real}, burnin::Integer, thin::Integer)
+    samps, _  = metropolis_hastings_simple(target, prop, θ_js, 1, burnin, thin)
     return samps
-end
-
-
-function runChains2(target, prop, θ_js, burnin, thin)
-    Nsamples = size(θ_js, 1)
-    Ndims    = size(θ_js, 2)
-    θ_j1 = zeros(Nsamples, Ndims)
-    α = zeros(Nsamples, 1)
-    for i = 1:Nsamples
-        samps, αs = MHsampleSimple(target, prop, θ_j[i], 1, burnin, thin)
-        θ_j1[i,:] = samps
-        α[i] = αs
-    end
-
-    return θ_j1, α
 end

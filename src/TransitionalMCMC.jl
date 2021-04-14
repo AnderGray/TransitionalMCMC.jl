@@ -24,7 +24,7 @@ module TransitionalMCMC
 
 using Distributed, StatsBase, Distributions, Logging
 
-export tmcmc, MHsample, MHsampleSimple
+export tmcmc, metropolis_hastings, metropolis_hastings_simple
 
 include("tmcmc.jl")
 include("mcmc.jl")
