@@ -10,4 +10,5 @@ Logging = "56ddb016-857b-54e1-b83d-db4d58db5568"
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
+StatsBase = "0.33"
 Distributions = "0.24"
