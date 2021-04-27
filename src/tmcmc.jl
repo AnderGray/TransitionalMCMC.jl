@@ -42,7 +42,7 @@ function tmcmc(
 
     Ndims = size(θ_j, 2)         # Number of dimensions (input)
 
-    Σ_j = zeros(Ndims, Ndims)
+    covariance_method = LinearShrinkage(DiagonalCommonVariance()) # * DiagonalCommonVariance is always SPD!
 
     @timeit_debug to "Main while loop" while βj < 1
 
@@ -56,74 +56,36 @@ function tmcmc(
 
         @debug "Computing likelihood with $(nworkers()) workers..."
 
-        @timeit_debug to "Initialize ins" ins = [θ_j[i,:] for i in 1:size(θ_j, 1)]
-        Lp_j = pmap(log_fD_T, ins)
+        Lp_j = pmap(log_fD_T, eachrow(θ_j))
         Lp_j = reduce(vcat, Lp_j)
+        Lp_adjust = maximum(Lp_j)
 
         ###
         #   Computing new βj
-        #   Uses bisection method
         ###
-        @debug "Computing β_j..."
+        @debug "Computing β_j and weights..."
 
-        low_β = βj; hi_β = 2; Lp_adjust = maximum(Lp_j);
-        x1 = (hi_β + low_β) / 2;
-
-        @timeit_debug to "Inner while loop" while (hi_β - low_β) / ((hi_β + low_β) / 2) > 1e-6
-            x1 = (hi_β + low_β) / 2;
-            wj_test = exp.((x1 .- βj ) .* (Lp_j .- Lp_adjust));
-            cov_w   = std(wj_test) / mean(wj_test);
-            if cov_w > 1; hi_β = x1; else; low_β = x1; end
-        end
-
-        βj1 = min(1, x1)
+        @timeit_debug to "Compute β and weights " βj1, w_j = _beta_and_weights(βj, Lp_j .- Lp_adjust)
 
         @info "β_$(j1) = $(βj1)"
 
-        ###
-        #   Computation of normalised weights
-        ###
-        @debug "Computing weights..."
-
-        @timeit_debug to "Nominal weights" w_j = exp.((βj1 - βj) .* (Lp_j .- Lp_adjust))       # Nominal weights from likilhood and βjs
-
         @timeit_debug to "Log evidence" Log_ev = log(mean(w_j)) + (βj1 - βj) * Lp_adjust + Log_ev   # Log evidence in current iteration
 
-        # Normalised weights
-        @timeit_debug to "Normalised weights" wn_j = w_j ./ sum(w_j);
+        # Estimate covariance matrix
+        @timeit_debug to "Compute covariance" Σ_j = beta2 * cov(covariance_method, w_j .* θ_j)
 
-        @timeit_debug to "Weighted mean" Th_wm = θ_j .* wn_j                 # Weighted mean of samples
-
-        @timeit_debug to "Compute covariance" begin
-            ###
-            #   Calculation of COV matrix of proposal
-            ###
-            @timeit_debug to "Inititialize Σ_j" Σ_j .= 0
-
-            @timeit_debug to "Update Σ_j" for l = 1:Nsamples
-                Σ_j .+= beta2 .* wn_j[l] .* (θ_j[l,:]' .- Th_wm)' * (θ_j[l,:]' .- Th_wm)
-            end
-
-            # Ensure that cov is symetric
-            @timeit_debug to "Symmetrize Σ_j" begin
-                Σ_j .+= Σ_j'
-                Σ_j ./= 2
-            end
-
-        end
         prop = mu -> proprnd(mu, Σ_j, log_fT) # Anonymous function for proposal
-
         target = x -> log_fD_T(x) .* βj1 .+ log_fT(x) # Anonymous function for transitional distribution
 
-        # Weighted resampling of θj (indecies with replacement)
-        @timeit_debug to "Compute randIndex" randIndex = sample(1:Nsamples, Weights(wn_j), Nsamples, replace=true)
-
-        @timeit_debug to "Update ins" ins = [θ_j[randIndex[i], :] for i = 1:Nsamples]
+        # (Normalized) Weighted resampling of θj (indices with replacement)
+        @timeit_debug to "Normalised weights" wn_j = w_j ./ sum(w_j); # normalize weights
+        @timeit_debug to "Compute indices" indices = sample(1:Nsamples, Weights(wn_j), Nsamples, replace=true)
+        @timeit_debug to "Update θ_j1" θ_j1 = θ_j[indices, :]
 
         @debug "Markov chains with $(nworkers()) workers..."
-        # pmap is a parallel map
-        @timeit_debug to "Run chains" θ_j1 = pmap(x -> run_chains(target, prop, x, burnin, thin), ins)
 
+        # pmap is a parallel map
+        @timeit_debug to "Run markov chains" θ_j1 = pmap(x -> metropolis_hastings_simple(target, prop, x, 1, burnin, thin)[1], eachrow(θ_j1))
         θ_j1 = reduce(vcat, θ_j1)
 
         βj = βj1
@@ -132,6 +94,30 @@ function tmcmc(
     return θ_j, Log_ev
 end
 
+"""
+    _beta_and_weights(β, likelihood)
+
+Compute the next value for `β` and the nominal weights `w` using bisection.
+"""
+function _beta_and_weights(β::Real, adjusted_likelihood::AbstractVector{<:Real})
+    low = β
+    high = 2
+
+    local x, w # Declare variables so they are visible outside the loop
+
+    while (high - low) / ((high + low) / 2) > 1e-6
+        x = (high + low) / 2
+        w = exp.((x .- β) .* adjusted_likelihood)
+
+        if std(w) / mean(w) > 1
+            high = x
+        else
+            low = x
+        end
+    end
+
+    return min(1, x), w
+end
 
 function proprnd(mu::AbstractVector, covMat::AbstractMatrix, prior::Function)
     samp = rand(MvNormal(mu, covMat), 1)
@@ -139,9 +125,4 @@ function proprnd(mu::AbstractVector, covMat::AbstractMatrix, prior::Function)
         samp = rand(MvNormal(mu, covMat), 1)
     end
     return samp[:]
-end
-
-function run_chains(target::Function, prop::Function, θ_js::Vector{<:Real}, burnin::Integer, thin::Integer)
-    samps, _  = metropolis_hastings_simple(target, prop, θ_js, 1, burnin, thin)
-    return samps
 end
