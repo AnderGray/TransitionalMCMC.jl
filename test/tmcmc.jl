@@ -61,7 +61,7 @@
 
 
     @testset "Himmelblau parallel" begin
-        Random.seed!(123456)
+        @everywhere Random.seed!(123456)
         addprocs(2; exeflags = "--project")
         @everywhere begin
 
