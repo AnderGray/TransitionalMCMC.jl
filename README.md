@@ -1,7 +1,7 @@
 # TransitionalMCMC.jl
 ![Build Status](https://github.com/AnderGray/TransitionalMCMC.jl/workflows/CI/badge.svg)
 [![Coverage Status](https://codecov.io/gh/AnderGray/TransitionalMCMC.jl/branch/main/graph/badge.svg?token=LfslMAoWvA)](https://codecov.io/gh/AnderGray/TransitionalMCMC.jl)
-[![DOI](https://zenodo.org/badge/331826833.svg)](https://zenodo.org/badge/latestdoi/331826833)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4701274.svg)](https://doi.org/10.5281/zenodo.4701274)
 
 Implementation of Transitional Markov Chain Monte Carlo (TMCMC) in Julia. This implementation is heavily inspired by the implemntation of TMCMC in [OpenCOSSAN](https://github.com/cossan-working-group/OpenCossan).
 
@@ -21,11 +21,11 @@ where 0 <= B<sub>j</sub> <= 1, is iterated in the algorithm starting from B<sub>
 
 ## Installation
 
-This is not yet a registered Julia package. However this package may be installed using the Julia package manager:
+This is a registered Julia package:
 
 ```Julia
 julia> ]
-pkg> add https://github.com/AnderGray/TransitionalMCMC.jl
+pkg> add TransitionalMCMC
 ```
 
 ## Usage
