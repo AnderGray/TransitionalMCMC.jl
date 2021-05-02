@@ -78,29 +78,29 @@ function metropolis_hastings_simple(
     thin::Integer=3)
 
     dims = length(start)                                    # Dimensions of input/ prior
-    chain = zeros(Nsamples * thin + burnin, dims)
-    chain[1, :] = start[:]
+    chain = zeros(dims, Nsamples * thin + burnin)
+    chain[:, 1] = start[:]
     accRate = 0
 
     for i = 2:( Nsamples * thin + burnin)
 
-        next = PropRnd(chain[i - 1, :])                 # Draw candidate
+        next = PropRnd(chain[:, i - 1])                 # Draw candidate
 
         targDen = Target(next)[1]                    # Target Density at next sample
-        targPrevious = Target(chain[i - 1, :])[1]       # Target Density at current sample
+        targPrevious = Target(chain[:, i - 1])[1]       # Target Density at current sample
 
         α =  min(0, targDen - targPrevious)
 
         accepted = α >= log(rand())
 
         if accepted
-            chain[i, :] = next
+            chain[:, i] = next
             accRate = accRate + 1
         else
-            chain[i, :] = chain[i - 1, :]
+            chain[:, i] = chain[:, i - 1]
         end
 
     end
     accRate = accRate / (Nsamples * thin + burnin)
-    return chain[burnin + 1:thin:end, :], accRate
+    return chain[:, burnin + 1:thin:end]', accRate
 end
