@@ -11,7 +11,7 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 TimerOutputs = "a759f4b9-e2f1-59dc-863e-4aeb61b1ea8f"
 
 [compat]
-Distributions = "0.24"
+Distributions = "0.24, 0.25"
 StatsBase = "0.33"
 TimerOutputs = "0.5"
 julia = "1"
