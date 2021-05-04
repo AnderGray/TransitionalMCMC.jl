@@ -16,12 +16,12 @@
         log_fD_T(x) = log(w[1] * pdf(Normal(μ[1], σ[1]), x[1]) + w[2] * pdf(Normal(μ[2], σ[2]), x[1]))
 
         Nsamples = 1000
-        samps, _ = tmcmc(log_fD_T, fT, sample_fT, Nsamples)
+        X, _ = tmcmc(log_fD_T, fT, sample_fT, Nsamples)
 
-        mean = sum(w .* μ)
-        std = sqrt(sum(w .* (σ.^2 + μ.^2 .- mean^2)))
+        m = sum(w .* μ)
+        s = sqrt(sum(w .* (σ.^2 + μ.^2 .- m^2)))
 
-        h0 = ExactOneSampleKSTest(vec(samps), Normal(mean, std))
+        h0 = ExactOneSampleKSTest(vec(X), Normal(m, s))
 
         @test pvalue(h0) < 1e-4
     end
@@ -31,19 +31,31 @@
         lb  = -15
         ub  = 15
 
+        w = [0.6 0.4]
+        μ = [0 5; 0 5]
+
+        Σ1 = [1 -0.5; -0.5 1]
+        Σ2 = [1 0.5; 0.5 1]
         fT(x) = logpdf(Uniform(lb, ub), x[1]) .+ logpdf(Uniform(lb, ub), x[2])
         sample_fT(Nsamples) = rand(Uniform(lb, ub), Nsamples, 2)
 
-        log_fD_T(x) = log.(pdf(MvNormal([0,0], [1 -0.5; -0.5 1]), x) + pdf(MvNormal([5,5], [1 0.5; 0.5 1]), x) + pdf(MvNormal([-5,5], [1 0.9; 0.9 1]), x))
+        log_fD_T(x) = log.(w[1] * pdf(MvNormal(μ[:, 1], Σ1), x) + w[2] * pdf(MvNormal(μ[:, 2], Σ2), x))
 
-        samps, acc = tmcmc(log_fD_T, fT, sample_fT, 2000)
+        Nsamples = 2000
+        X, _ = tmcmc(log_fD_T, fT, sample_fT, Nsamples)
 
-        μ = mean(samps, dims=1)
-        σ = std(samps, dims=1)
-        corrs = cor(samps)
-        @test vec(μ) ≈ [ -0.04904654270772346; 3.324840746169731] atol = 0.3
-        @test vec(σ) ≈ [4.1931;  2.56974] atol = 0.2
-        @test corrs ≈ [ 1.0 0.019783; 0.019783  1.0] atol = 0.2
+        m = sum(w .* μ, dims=2) |> vec
+        C = w[1] * Σ1 + w[2] * Σ2
+        C += w[1] * (μ[:, 1] - m) * (μ[:, 1] - m)'
+        C += w[2] * (μ[:, 2] - m) * (μ[:, 2] - m)'
+
+        h0 = OneSampleHotellingT2Test(X, m)
+        @test pvalue(h0) < 1e-4
+
+        Y = rand(MvNormal(m, C), Nsamples)'
+        h0 = EqualCovHotellingT2Test(X, Y)
+
+        @test pvalue(h0) < 1e-3
     end
 
     @testset "Himmelblau" begin
