@@ -4,18 +4,22 @@
 
     @testset "1D" begin
         Random.seed!(123456)
-        lb  = -15
-        ub  = 15
+        lb, ub  = -15, 15
 
-        fT(x) = logpdf(Uniform(lb, ub), x[1])
-        sample_fT(Nsamples) = rand(Uniform(lb, ub), Nsamples, 1)
+        μ = [0 5]
+        σ = [1 0.2]
+        w = [0.7 0.3]
 
-        log_fD_T(x) = log(pdf(Normal(0, 1), x[1]) + pdf(Normal(5, 0.2), x[1]))
+        fT(x) = logpdf(Uniform(lb,ub), x[1])
+        sample_fT(Nsamples) = rand(Uniform(lb,ub), Nsamples, 1)
 
-        Nsamples = 2000
-        samps, acc = tmcmc(log_fD_T, fT, sample_fT, Nsamples)
-        @test mean(samps) ≈ 2.5 atol = 0.2
-        @test std(samps) ≈ 2.6 atol = 0.2
+        log_fD_T(x) = log(w[1] * pdf(Normal(μ[1], σ[1]), x[1]) + w[2] * pdf(Normal(μ[2], σ[2]), x[1]))
+
+        Nsamples = 50000
+        samps, _ = tmcmc(log_fD_T, fT, sample_fT, Nsamples)
+
+        @test mean(samps) ≈ sum(w .* μ) rtol = 0.01
+        @test std(samps) ≈ sqrt(sum(w.* (σ.^2 + μ.^2 .- sum(w .* μ)^2))) rtol = 0.01
     end
 
     @testset "2D" begin
