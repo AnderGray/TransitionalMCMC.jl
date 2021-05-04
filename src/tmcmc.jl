@@ -42,7 +42,7 @@ function tmcmc(
 
     Ndims = size(θ_j, 2)         # Number of dimensions (input)
 
-    covariance_method = LinearShrinkage(DiagonalCommonVariance()) # * DiagonalCommonVariance is always SPD!
+    covariance_method = LinearShrinkage(DiagonalUnequalVariance()) # * DiagonalUnequalVariance is always SPD!
 
     @timeit_debug to "Main while loop" while βj < 1
 
