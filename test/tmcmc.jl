@@ -10,16 +10,20 @@
         σ = [1 0.2]
         w = [0.7 0.3]
 
-        fT(x) = logpdf(Uniform(lb,ub), x[1])
-        sample_fT(Nsamples) = rand(Uniform(lb,ub), Nsamples, 1)
+        fT(x) = logpdf(Uniform(lb, ub), x[1])
+        sample_fT(Nsamples) = rand(Uniform(lb, ub), Nsamples, 1)
 
         log_fD_T(x) = log(w[1] * pdf(Normal(μ[1], σ[1]), x[1]) + w[2] * pdf(Normal(μ[2], σ[2]), x[1]))
 
-        Nsamples = 50000
+        Nsamples = 1000
         samps, _ = tmcmc(log_fD_T, fT, sample_fT, Nsamples)
 
-        @test mean(samps) ≈ sum(w .* μ) rtol = 0.01
-        @test std(samps) ≈ sqrt(sum(w.* (σ.^2 + μ.^2 .- sum(w .* μ)^2))) rtol = 0.01
+        mean = sum(w .* μ)
+        std = sqrt(sum(w .* (σ.^2 + μ.^2 .- mean^2)))
+
+        h0 = ExactOneSampleKSTest(vec(samps), Normal(mean, std))
+
+        @test pvalue(h0) < 1e-4
     end
 
     @testset "2D" begin
@@ -34,8 +38,8 @@
 
         samps, acc = tmcmc(log_fD_T, fT, sample_fT, 2000)
 
-        μ = mean(samps, dims = 1)
-        σ = std(samps, dims = 1)
+        μ = mean(samps, dims=1)
+        σ = std(samps, dims=1)
         corrs = cor(samps)
         @test vec(μ) ≈ [ -0.04904654270772346; 3.324840746169731] atol = 0.3
         @test vec(σ) ≈ [4.1931;  2.56974] atol = 0.2
@@ -55,8 +59,8 @@
 
         samps, acc = tmcmc(logLik, logprior, priorRnd, 2000)
 
-        μ = mean(samps, dims = 1)
-        σ = std(samps, dims = 1)
+        μ = mean(samps, dims=1)
+        σ = std(samps, dims=1)
         corrs = cor(samps)
         @test vec(μ) ≈ [  0.6448241433718321; 0.5207538113617672] atol = 0.3
         @test vec(σ) ≈ [3.09665;  2.40973] atol = 0.2
@@ -66,7 +70,7 @@
 
     @testset "Himmelblau parallel" begin
         @everywhere Random.seed!(123456)
-        addprocs(2; exeflags = "--project")
+        addprocs(2; exeflags="--project")
         @everywhere begin
 
             using TransitionalMCMC, Distributions
@@ -87,8 +91,8 @@
 
         samps, acc = tmcmc(logLik, logprior, priorRnd, Nsamples)
 
-        μ = mean(samps, dims = 1)
-        σ = std(samps, dims = 1)
+        μ = mean(samps, dims=1)
+        σ = std(samps, dims=1)
         corrs = cor(samps)
         @test vec(μ) ≈ [  1.0273;  0.355209] atol = 0.4
         @test vec(σ) ≈ [3.09665;  2.40973] atol = 0.2
