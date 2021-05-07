@@ -71,14 +71,16 @@
         # Log Likelihood
         logLik(x) = -1 * ((x[1]^2 + x[2] - 11)^2 + (x[1] + x[2]^2 - 7)^2)
 
-        samps, acc = tmcmc(logLik, logprior, priorRnd, 2000)
+        samps, acc = tmcmc(logLik, logprior, priorRnd, 10000)
 
-        μ = mean(samps, dims=1)
-        σ = std(samps, dims=1)
+        μ = mean(samps, dims=1) |> vec
+        σ = std(samps, dims=1) |> vec
         corrs = cor(samps)
-        @test vec(μ) ≈ [  0.6448241433718321; 0.5207538113617672] atol = 0.3
-        @test vec(σ) ≈ [3.09665;  2.40973] atol = 0.2
-        @test corrs ≈ [1.0 -0.0661209; -0.0661209 1.0] atol = 0.3
+
+        # Reference values obtained using 1e7 samples
+        @test [0.7, 0.2] < μ < [1, 0.4] # [0.832681 0.286942]
+        @test [2.8, 2.1] < σ < [3.4, 2.8] # [3.16236 2.45603]
+        @test corrs ≈ [1.0 0; 0 1.0] atol = 0.1 # independent
     end
 
 
@@ -102,16 +104,18 @@
 
         end
 
-        Nsamples = 2000
+        Nsamples = 10000
 
         samps, acc = tmcmc(logLik, logprior, priorRnd, Nsamples)
 
-        μ = mean(samps, dims=1)
-        σ = std(samps, dims=1)
+        μ = mean(samps, dims=1) |> vec
+        σ = std(samps, dims=1) |> vec
         corrs = cor(samps)
-        @test vec(μ) ≈ [  1.0273;  0.355209] atol = 0.4
-        @test vec(σ) ≈ [3.09665;  2.40973] atol = 0.2
-        @test corrs ≈ [1.0 -0.0661209; -0.0661209 1.0] atol = 0.3
+
+        # Reference values obtained using 1e7 samples
+        @test [0.7, 0.2] < μ < [1, 0.4] # [0.832681 0.286942]
+        @test [2.8, 2.1] < σ < [3.4, 2.8] # [3.16236 2.45603]
+        @test corrs ≈ [1.0 0; 0 1.0] atol = 0.1 # independent
 
         rmprocs(workers())
     end
