@@ -92,7 +92,7 @@ function tmcmc(
         # Normalised weights
         @timeit_debug to "Normalised weights" wn_j = w_j ./ sum(w_j);
 
-        @timeit_debug to "Weighted mean" Th_wm = θ_j .* wn_j                 # Weighted mean of samples
+        @timeit_debug to "Weighted mean" Th_wm = sum(θ_j .* wn_j, dims=1)                 # Weighted mean of samples
 
         @timeit_debug to "Compute covariance" begin
             ###
@@ -111,6 +111,7 @@ function tmcmc(
             end
 
         end
+
         prop = mu -> proprnd(mu, Σ_j, log_fT) # Anonymous function for proposal
 
         target = x -> log_fD_T(x) .* βj1 .+ log_fT(x) # Anonymous function for transitional distribution

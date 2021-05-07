@@ -4,38 +4,60 @@
 
     @testset "1D" begin
         Random.seed!(123456)
-        lb  = -15
-        ub  = 15
+        lb, ub  = -15, 15
+
+        μ = [0 5]
+        σ = [1 0.2]
+        w = [0.7 0.3]
 
         fT(x) = logpdf(Uniform(lb, ub), x[1])
         sample_fT(Nsamples) = rand(Uniform(lb, ub), Nsamples, 1)
 
-        log_fD_T(x) = log(pdf(Normal(0, 1), x[1]) + pdf(Normal(5, 0.2), x[1]))
+        log_fD_T(x) = log(w[1] * pdf(Normal(μ[1], σ[1]), x[1]) + w[2] * pdf(Normal(μ[2], σ[2]), x[1]))
 
-        Nsamples = 2000
-        samps, acc = tmcmc(log_fD_T, fT, sample_fT, Nsamples)
-        @test mean(samps) ≈ 2.5 atol = 0.2
-        @test std(samps) ≈ 2.6 atol = 0.2
+        Nsamples = 1000
+        X, _ = tmcmc(log_fD_T, fT, sample_fT, Nsamples)
+
+        m = sum(w .* μ)
+        s = sqrt(sum(w .* (σ.^2 + μ.^2 .- m^2)))
+
+        h0 = ExactOneSampleKSTest(vec(X), Normal(m, s))
+
+        @test pvalue(h0) < 1e-4
     end
 
     @testset "2D" begin
-        Random.seed!(123456)
-        lb  = -15
-        ub  = 15
+        Random.seed!(1234)
+
+        lb, ub  = -15, 15
+
+        w = [0.6, 0.4]
+        μ = [0 5; 0 5]
+
+        Σ1 = [1 -0.5; -0.5 1]
+        Σ2 = [1 0.5; 0.5 1]
+
+        # Compute mean and cov of resulting gaussian mixture
+        m = sum(w .* μ, dims=2) |> vec
+        C = w[1] * Σ1 + w[2] * Σ2
+        C += w[1] * (μ[:, 1] - m) * (μ[:, 1] - m)'
+        C += w[2] * (μ[:, 2] - m) * (μ[:, 2] - m)'
+
+        Nsamples = 10000
+        Y = rand(MvNormal(m, C), Nsamples)'
 
         fT(x) = logpdf(Uniform(lb, ub), x[1]) .+ logpdf(Uniform(lb, ub), x[2])
         sample_fT(Nsamples) = rand(Uniform(lb, ub), Nsamples, 2)
 
-        log_fD_T(x) = log.(pdf(MvNormal([0,0], [1 -0.5; -0.5 1]), x) + pdf(MvNormal([5,5], [1 0.5; 0.5 1]), x) + pdf(MvNormal([-5,5], [1 0.9; 0.9 1]), x))
+        log_fD_T(x) = log.(w[1] * pdf(MvNormal(μ[:, 1], Σ1), x) + w[2] * pdf(MvNormal(μ[:, 2], Σ2), x))
 
-        samps, acc = tmcmc(log_fD_T, fT, sample_fT, 2000)
+        X, _ = tmcmc(log_fD_T, fT, sample_fT, Nsamples)
 
-        μ = mean(samps, dims = 1)
-        σ = std(samps, dims = 1)
-        corrs = cor(samps)
-        @test vec(μ) ≈ [ -0.04904654270772346; 3.324840746169731] atol = 0.3
-        @test vec(σ) ≈ [4.1931;  2.56974] atol = 0.2
-        @test corrs ≈ [ 1.0 0.019783; 0.019783  1.0] atol = 0.2
+        h0 = OneSampleHotellingT2Test(X, m)
+        @test pvalue(h0) < 0.05
+
+        h0 = BartlettTest(X, Y)
+        @test pvalue(h0) < 0.05
     end
 
     @testset "Himmelblau" begin
@@ -49,23 +71,26 @@
         # Log Likelihood
         logLik(x) = -1 * ((x[1]^2 + x[2] - 11)^2 + (x[1] + x[2]^2 - 7)^2)
 
-        samps, acc = tmcmc(logLik, logprior, priorRnd, 2000)
+        samps, acc = tmcmc(logLik, logprior, priorRnd, 10000)
 
-        μ = mean(samps, dims = 1)
-        σ = std(samps, dims = 1)
+        μ = mean(samps, dims=1) |> vec
+        σ = std(samps, dims=1) |> vec
         corrs = cor(samps)
-        @test vec(μ) ≈ [  0.6448241433718321; 0.5207538113617672] atol = 0.3
-        @test vec(σ) ≈ [3.09665;  2.40973] atol = 0.2
-        @test corrs ≈ [1.0 -0.0661209; -0.0661209 1.0] atol = 0.3
+
+        # Reference values obtained using 1e7 samples
+        @test [0.7, 0.2] < μ < [1, 0.4] # [0.832681 0.286942]
+        @test [2.8, 2.1] < σ < [3.4, 2.8] # [3.16236 2.45603]
+        @test corrs ≈ [1.0 0; 0 1.0] atol = 0.1 # independent
     end
 
 
     @testset "Himmelblau parallel" begin
-        @everywhere Random.seed!(123456)
-        addprocs(2; exeflags = "--project")
+        addprocs(2; exeflags="--project")
         @everywhere begin
 
-            using TransitionalMCMC, Distributions
+            using TransitionalMCMC, Distributions, Random
+
+            Random.seed!(123456)
 
             # Prior Bounds
             lb, ub  = -5, 5
@@ -79,16 +104,18 @@
 
         end
 
-        Nsamples = 2000
+        Nsamples = 10000
 
         samps, acc = tmcmc(logLik, logprior, priorRnd, Nsamples)
 
-        μ = mean(samps, dims = 1)
-        σ = std(samps, dims = 1)
+        μ = mean(samps, dims=1) |> vec
+        σ = std(samps, dims=1) |> vec
         corrs = cor(samps)
-        @test vec(μ) ≈ [  1.0273;  0.355209] atol = 0.4
-        @test vec(σ) ≈ [3.09665;  2.40973] atol = 0.2
-        @test corrs ≈ [1.0 -0.0661209; -0.0661209 1.0] atol = 0.3
+
+        # Reference values obtained using 1e7 samples
+        @test [0.7, 0.2] < μ < [1, 0.4] # [0.832681 0.286942]
+        @test [2.8, 2.1] < σ < [3.4, 2.8] # [3.16236 2.45603]
+        @test corrs ≈ [1.0 0; 0 1.0] atol = 0.1 # independent
 
         rmprocs(workers())
     end
