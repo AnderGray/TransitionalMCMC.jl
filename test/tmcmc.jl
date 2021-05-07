@@ -27,35 +27,37 @@
     end
 
     @testset "2D" begin
-        Random.seed!(123456)
-        lb  = -15
-        ub  = 15
+        Random.seed!(1234)
 
-        w = [0.6 0.4]
+        lb, ub  = -15, 15
+
+        w = [0.6, 0.4]
         μ = [0 5; 0 5]
 
         Σ1 = [1 -0.5; -0.5 1]
         Σ2 = [1 0.5; 0.5 1]
-        fT(x) = logpdf(Uniform(lb, ub), x[1]) .+ logpdf(Uniform(lb, ub), x[2])
-        sample_fT(Nsamples) = rand(Uniform(lb, ub), Nsamples, 2)
 
-        log_fD_T(x) = log.(w[1] * pdf(MvNormal(μ[:, 1], Σ1), x) + w[2] * pdf(MvNormal(μ[:, 2], Σ2), x))
-
-        Nsamples = 2000
-        X, _ = tmcmc(log_fD_T, fT, sample_fT, Nsamples)
-
+        # Compute mean and cov of resulting gaussian mixture
         m = sum(w .* μ, dims=2) |> vec
         C = w[1] * Σ1 + w[2] * Σ2
         C += w[1] * (μ[:, 1] - m) * (μ[:, 1] - m)'
         C += w[2] * (μ[:, 2] - m) * (μ[:, 2] - m)'
 
-        h0 = OneSampleHotellingT2Test(X, m)
-        @test pvalue(h0) < 1e-4
-
+        Nsamples = 10000
         Y = rand(MvNormal(m, C), Nsamples)'
-        h0 = EqualCovHotellingT2Test(X, Y)
 
-        @test pvalue(h0) < 1e-3
+        fT(x) = logpdf(Uniform(lb, ub), x[1]) .+ logpdf(Uniform(lb, ub), x[2])
+        sample_fT(Nsamples) = rand(Uniform(lb, ub), Nsamples, 2)
+
+        log_fD_T(x) = log.(w[1] * pdf(MvNormal(μ[:, 1], Σ1), x) + w[2] * pdf(MvNormal(μ[:, 2], Σ2), x))
+
+        X, _ = tmcmc(log_fD_T, fT, sample_fT, Nsamples)
+
+        h0 = OneSampleHotellingT2Test(X, m)
+        @test pvalue(h0) < 0.05
+
+        h0 = BartlettTest(X, Y)
+        @test pvalue(h0) < 0.05
     end
 
     @testset "Himmelblau" begin
@@ -81,11 +83,12 @@
 
 
     @testset "Himmelblau parallel" begin
-        @everywhere Random.seed!(123456)
         addprocs(2; exeflags="--project")
         @everywhere begin
 
-            using TransitionalMCMC, Distributions
+            using TransitionalMCMC, Distributions, Random
+
+            Random.seed!(123456)
 
             # Prior Bounds
             lb, ub  = -5, 5
