@@ -13,7 +13,7 @@ TimerOutputs = "a759f4b9-e2f1-59dc-863e-4aeb61b1ea8f"
 
 [compat]
 CovarianceEstimation = "0.2.5"
-Distributions = "0.24"
+Distributions = "0.24, 0.25"
 StatsBase = "0.33"
 TimerOutputs = "0.5"
 julia = "1"
