@@ -42,7 +42,7 @@ function tmcmc(
 
     Ndims = size(θ_j, 2)         # Number of dimensions (input)
 
-    covariance_method = LinearShrinkage(DiagonalUnequalVariance()) # * DiagonalUnequalVariance is always SPD!
+    covariance_method = LinearShrinkage(DiagonalUnitVariance(), :lw) # * DiagonalUnitVariance is always SPD!
 
     @timeit_debug to "Main while loop" while βj < 1
 
@@ -71,9 +71,6 @@ function tmcmc(
 
         @timeit_debug to "Log evidence" Log_ev = log(mean(w_j)) + (βj1 - βj) * Lp_adjust + Log_ev   # Log evidence in current iteration
 
-        # Estimate covariance matrix
-        @timeit_debug to "Compute covariance" Σ_j = beta2 * cov(covariance_method, w_j .* θ_j)
-
         prop = mu -> proprnd(mu, Σ_j, log_fT) # Anonymous function for proposal
         target = x -> log_fD_T(x) .* βj1 .+ log_fT(x) # Anonymous function for transitional distribution
 
@@ -81,6 +78,9 @@ function tmcmc(
         @timeit_debug to "Normalised weights" wn_j = w_j ./ sum(w_j); # normalize weights
         @timeit_debug to "Compute indices" indices = sample(1:Nsamples, Weights(wn_j), Nsamples, replace=true)
         @timeit_debug to "Update θ_j1" θ_j1 = θ_j[indices, :]
+
+        # Estimate covariance matrix
+        @timeit_debug to "Compute covariance" Σ_j = beta2 * cov(covariance_method, θ_j1)
 
         @debug "Markov chains with $(nworkers()) workers..."
 
