@@ -71,7 +71,7 @@
         # Log Likelihood
         logLik(x) = -1 * ((x[1]^2 + x[2] - 11)^2 + (x[1] + x[2]^2 - 7)^2)
 
-        samps, acc = tmcmc(logLik, logprior, priorRnd, 10000)
+        samps, acc = tmcmc(logLik, logprior, priorRnd, 20000)
 
         μ = mean(samps, dims=1) |> vec
         σ = std(samps, dims=1) |> vec
@@ -104,7 +104,7 @@
 
         end
 
-        Nsamples = 10000
+        Nsamples = 20000
 
         samps, acc = tmcmc(logLik, logprior, priorRnd, Nsamples)
 

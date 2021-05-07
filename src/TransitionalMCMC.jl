@@ -22,7 +22,7 @@
 ###
 module TransitionalMCMC
 
-using Distributed, StatsBase, Distributions, Logging
+using Distributed, StatsBase, Distributions, Logging, CovarianceEstimation
 
 export tmcmc, metropolis_hastings, metropolis_hastings_simple
 
