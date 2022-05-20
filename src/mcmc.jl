@@ -23,47 +23,72 @@
 function metropolis_hastings(
     Target::Function,
     Prop::Function,
-    start::Vector{<:Real},
+    start::AbstractVector{<:Real},
     Nsamples::Integer,
     burnin::Integer=50,
     thin::Integer=3;
-    islogged::Bool=true)
-
+    islogged::Bool=true,
+)
     dims = length(start)                                    # Dimensions of input/ prior
 
     PropRnd = mu -> rand(Prop(mu))                          # Generates a sample from the proposal given mean mu
 
-    chain = zeros(Nsamples * thin + burnin, dims)
-    chain[1,:] = start
+    if dims > 1
+        chain = zeros(Nsamples * thin + burnin, dims)
+        chain[1, :] = start
+    else
+        chain = zeros(Nsamples * thin + burnin)
+        chain[1] = start[1]
+    end
+
     accRate = 0
 
-    islogged ? evalDen =  x -> exp(Target(x)) : evalDen = x -> Target(x)
+    islogged ? evalDen = x -> exp(Target(x)) : evalDen = x -> Target(x)
 
-    for i = 2:( Nsamples * thin + burnin)
-
-        next = PropRnd(chain[i - 1, :])              # Draw candidate
+    for i in 2:(Nsamples * thin + burnin)
+        current = dims > 1 ? chain[i - 1, :] : chain[i - 1]
+        next = PropRnd(current)              # Draw candidate
 
         targDen = evalDen(next)                  # Target Density at next sample
-        targPrevious = evalDen(chain[i - 1, :])     # Target Density at current sample
+        targPrevious = evalDen(current)     # Target Density at current sample
 
-        propDen = pdf(Prop(chain[i - 1, :]), next)         # Proposal at next centred at current
-        propPrevious = pdf(Prop(next), chain[i - 1, :])    # Propsoal at current centred at next
-
+        propDen = pdf(Prop(current), next)         # Proposal at next centred at current
+        propPrevious = pdf(Prop(next), current)    # Propsoal at current centred at next
 
         α = targDen / targPrevious * propPrevious / propDen     # General formula for acceptance probability
 
         accepted = α >= rand()
 
         if accepted
-            chain[i, :] = next
+            dims > 1 ? chain[i, :] = next : chain[i] = next
             accRate = accRate + 1
         else
-            chain[i, :] = chain[i - 1, :]
+            dims > 1 ? chain[i, :] = current : chain[i] = current
         end
-
     end
     accRate = accRate / (Nsamples * thin + burnin)
-    return chain[burnin + 1:thin:end,:], accRate
+
+    if dims > 1
+        chain = chain[(burnin + 1):thin:end, :]
+    else
+        chain = chain[(burnin + 1):thin:end]
+    end
+
+    return chain, accRate
+end
+
+function metropolis_hastings(
+    Target::Function,
+    Prop::Function,
+    start::Real,
+    Nsamples::Integer,
+    burnin::Integer=50,
+    thin::Integer=3;
+    islogged::Bool=true,
+)
+    return metropolis_hastings(
+        Target, Prop, [start], Nsamples, burnin, thin; islogged=islogged
+    )
 end
 
 ##
@@ -75,32 +100,57 @@ function metropolis_hastings_simple(
     start::AbstractVector{<:Real},
     Nsamples::Integer,
     burnin::Integer=50,
-    thin::Integer=3)
+    thin::Integer=3,
+)
+    dims = length(start) # Dimensions of input/ prior
 
-    dims = length(start)                                    # Dimensions of input/ prior
-    chain = zeros(dims, Nsamples * thin + burnin)
-    chain[:, 1] = start[:]
+    if dims > 1
+        chain = zeros(dims, Nsamples * thin + burnin)
+        chain[:, 1] = start
+    else
+        chain = zeros(Nsamples * thin + burnin)
+        chain[1] = start[1]
+    end
+
     accRate = 0
 
-    for i = 2:( Nsamples * thin + burnin)
-
-        next = PropRnd(chain[:, i - 1])                 # Draw candidate
+    for i in 2:(Nsamples * thin + burnin)
+        current = dims > 1 ? chain[:, i - 1] : chain[i - 1]
+        next = PropRnd(current)                 # Draw candidate
 
         targDen = Target(next)[1]                    # Target Density at next sample
-        targPrevious = Target(chain[:, i - 1])[1]       # Target Density at current sample
+        targPrevious = Target(current)[1]       # Target Density at current sample
 
-        α =  min(0, targDen - targPrevious)
+        α = min(0, targDen - targPrevious)
 
         accepted = α >= log(rand())
 
         if accepted
-            chain[:, i] = next
+            dims > 1 ? chain[:, i] = next : chain[i] = next
             accRate = accRate + 1
         else
-            chain[:, i] = chain[:, i - 1]
+            dims > 1 ? chain[:, i] = current : chain[i] = current
         end
-
     end
+
     accRate = accRate / (Nsamples * thin + burnin)
-    return chain[:, burnin + 1:thin:end]', accRate
+
+    if dims > 1
+        chain = chain[:, (burnin + 1):thin:end]
+    else
+        chain = chain[(burnin + 1):thin:end]
+    end
+
+    return chain', accRate
+end
+
+function metropolis_hastings_simple(
+    Target::Function,
+    PropRnd::Function,
+    start::Real,
+    Nsamples::Integer,
+    burnin::Integer=50,
+    thin::Integer=3,
+)
+    return metropolis_hastings_simple(Target, PropRnd, [start], Nsamples, burnin, thin)
 end

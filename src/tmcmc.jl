@@ -31,12 +31,12 @@ function tmcmc(
     Nsamples::Integer,
     burnin::Integer=20,
     thin::Integer=3,
-    beta2::Float64=0.01)
-
-    j1 = 0;                     # Iteration number
-    βj = 0;                     # Tempering parameter
-    θ_j = sample_fT(Nsamples);  # Samples of prior
-    Lp_j = zeros(Nsamples, 1);   # Log liklihood of first iteration
+    beta2::Float64=0.01,
+)
+    j1 = 0                     # Iteration number
+    βj = 0                     # Tempering parameter
+    θ_j = sample_fT(Nsamples)  # Samples of prior
+    Lp_j = zeros(Nsamples, 1)   # Log liklihood of first iteration
 
     Log_ev = 0                  # Log Evidence
 
@@ -45,7 +45,6 @@ function tmcmc(
     covariance_method = LinearShrinkage(DiagonalUnitVariance(), :lw) # * DiagonalUnitVariance is always SPD!
 
     @timeit_debug to "Main while loop" while βj < 1
-
         j1 = j1 + 1
 
         @debug "Beginning iteration $j1"
@@ -65,18 +64,23 @@ function tmcmc(
         ###
         @debug "Computing β_j and weights..."
 
-        @timeit_debug to "Compute β and weights " βj1, w_j = _beta_and_weights(βj, Lp_j .- Lp_adjust)
+        @timeit_debug to "Compute β and weights " βj1, w_j = _beta_and_weights(
+            βj, Lp_j .- Lp_adjust
+        )
 
         @info "β_$(j1) = $(βj1)"
 
-        @timeit_debug to "Log evidence" Log_ev = log(mean(w_j)) + (βj1 - βj) * Lp_adjust + Log_ev   # Log evidence in current iteration
+        @timeit_debug to "Log evidence" Log_ev =
+            log(mean(w_j)) + (βj1 - βj) * Lp_adjust + Log_ev   # Log evidence in current iteration
 
         prop = mu -> proprnd(mu, Σ_j, log_fT) # Anonymous function for proposal
         target = x -> log_fD_T(x) .* βj1 .+ log_fT(x) # Anonymous function for transitional distribution
 
         # (Normalized) Weighted resampling of θj (indices with replacement)
-        @timeit_debug to "Normalised weights" wn_j = w_j ./ sum(w_j); # normalize weights
-        @timeit_debug to "Compute indices" indices = sample(1:Nsamples, Weights(wn_j), Nsamples, replace=true)
+        @timeit_debug to "Normalised weights" wn_j = w_j ./ sum(w_j) # normalize weights
+        @timeit_debug to "Compute indices" indices = sample(
+            1:Nsamples, Weights(wn_j), Nsamples; replace=true
+        )
         @timeit_debug to "Update θ_j1" θ_j1 = θ_j[indices, :]
 
         # Estimate covariance matrix
@@ -85,7 +89,10 @@ function tmcmc(
         @debug "Markov chains with $(nworkers()) workers..."
 
         # pmap is a parallel map
-        @timeit_debug to "Run markov chains" θ_j1 = pmap(x -> metropolis_hastings_simple(target, prop, x, 1, burnin, thin)[1], eachrow(θ_j1))
+        @timeit_debug to "Run markov chains" θ_j1 = pmap(
+            x -> metropolis_hastings_simple(target, prop, x, 1, burnin, thin)[1],
+            eachrow(θ_j1),
+        )
         θ_j1 = reduce(vcat, θ_j1)
 
         βj = βj1
@@ -124,5 +131,14 @@ function proprnd(mu::AbstractVector, covMat::AbstractMatrix, prior::Function)
     while isinf(prior(samp))
         samp = rand(MvNormal(mu, covMat), 1)
     end
-    return samp[:]
+    return samp
+end
+
+function proprnd(mu::Real, σ::AbstractMatrix, prior::Function)
+    σ = σ[1]
+    samp = rand(Normal(mu, σ))
+    while isinf(prior(samp))
+        samp = rand(Normal(mu, σ))
+    end
+    return samp
 end
