@@ -128,9 +128,9 @@ function _beta_and_weights(β::Real, adjusted_likelihood::AbstractVector{<:Real}
 end
 
 function proprnd(mu::AbstractVector, covMat::AbstractMatrix, prior::Function)
-    samp = rand(MvNormal(mu, covMat), 1)
+    samp = rand(MvNormal(mu, covMat))
     while isinf(prior(samp))
-        samp = rand(MvNormal(mu, covMat), 1)
+        samp = rand(MvNormal(mu, covMat))
     end
     return samp
 end
