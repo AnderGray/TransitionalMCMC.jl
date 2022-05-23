@@ -112,7 +112,8 @@ function _beta_and_weights(β::Real, adjusted_likelihood::AbstractVector{<:Real}
 
     local x, w # Declare variables so they are visible outside the loop
 
-    while (high - low) / ((high + low) / 2) > 1e-6
+    while (high - low) / ((high + low) / 2) > 1e-6 && high > eps()
+        @show (high, low)
         x = (high + low) / 2
         w = exp.((x .- β) .* adjusted_likelihood)
 
@@ -127,9 +128,9 @@ function _beta_and_weights(β::Real, adjusted_likelihood::AbstractVector{<:Real}
 end
 
 function proprnd(mu::AbstractVector, covMat::AbstractMatrix, prior::Function)
-    samp = rand(MvNormal(mu, covMat), 1)
+    samp = rand(MvNormal(mu, covMat))
     while isinf(prior(samp))
-        samp = rand(MvNormal(mu, covMat), 1)
+        samp = rand(MvNormal(mu, covMat))
     end
     return samp
 end

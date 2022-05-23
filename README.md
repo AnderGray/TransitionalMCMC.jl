@@ -1,4 +1,5 @@
 # TransitionalMCMC.jl
+
 ![Build Status](https://github.com/AnderGray/TransitionalMCMC.jl/workflows/CI/badge.svg)
 [![Coverage Status](https://codecov.io/gh/AnderGray/TransitionalMCMC.jl/branch/main/graph/badge.svg?token=LfslMAoWvA)](https://codecov.io/gh/AnderGray/TransitionalMCMC.jl)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4701274.svg)](https://doi.org/10.5281/zenodo.4701274)
@@ -15,9 +16,9 @@ The TMCMC algorithm can be used to sample from un-normalised probability density
 
 Instead of atempting to directly sample from the posterior, TMCMC samples from easy-to-sample "transitional" distributions. Defined by:
 
-<img src="https://imgur.com/5p4APND.png" data-canonical-src="https://imgur.com/5p4APND.png" width="300" />
+$P^j \propto P(\mathbf{D}|\theta)^{\beta_j} \cdot P(\theta)$
 
-where 0 <= B<sub>j</sub> <= 1, is iterated in the algorithm starting from B<sub>j</sub> = 0 (prior) to B<sub>j</sub> = 1 (posterior).
+where $0 \leq \beta_j \leq 1$, is iterated in the algorithm starting from $\beta_j = 0$ (prior) to $\beta_j = 1$ (posterior).
 
 ## Installation
 
@@ -52,8 +53,6 @@ samps, Log_ev = tmcmc(logLik, logprior, priorRnd, 2000)
 plt.scatter(samps[:,1], samps[:,2])
 ```
 
-
-
 <img src="https://imgur.com/ySv4BzI.png" data-canonical-src="https://imgur.com/ySv4BzI.png" width="1500" />
 
 ### For parallel excution
@@ -83,6 +82,7 @@ Nsamples = 2000
 
 samps, Log_ev = tmcmc(logLik, logprior, priorRnd, Nsamples, 5, 2)
 ```
+
 ### Benchmarks
 
 Found in [/slurm_benchmarks](https://github.com/AnderGray/TransitionalMCMC.jl/tree/main/slurm_benchmarks)
@@ -101,8 +101,8 @@ Testing slowdown and iteration number for various dimensions. Target is a mixtur
   <img src="https://imgur.com/fcOxklJ.png" data-canonical-src="https://imgur.com/PALKfor.png" width="400" />
 </p>
 
-
 ## Todo
+
 * Plotting functions
 * Storing samples across iterations
 * FE example
